@@ -11,7 +11,7 @@ export default function Home() {
 				<p className="text-xl text-gray-600 mb-8 text-center max-w-md">
 					買ってよかったものをみんなに共有しよう！
 				</p>
-				<Link href="/auth/login" passHref>
+				<Link href="/login" passHref>
 					<Button className="bg-gray-800 text-white hover:bg-gray-700 px-8 py-3 rounded-full text-lg font-semibold transition-colors duration-200">
 						ログイン
 					</Button>

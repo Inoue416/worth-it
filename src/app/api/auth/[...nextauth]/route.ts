@@ -30,11 +30,11 @@ export const authOptions: AuthOptions = {
 			session.user = { ...token };
 			return session;
 		},
-		jwt({ token, trigger, session }) {
+		async jwt({ token, trigger, session }) {
 			if (trigger === "update") token.user = session.user;
 			return token;
 		},
-	},
+	}
 };
 
 const handler = NextAuth(authOptions);
