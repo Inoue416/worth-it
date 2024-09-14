@@ -66,9 +66,6 @@ const Header = () => {
 						</Button>
 					</Link>
 				</div>
-
-				{/* 右側のスペースを確保するための空の要素 */}
-				<div className="w-10"></div>
 			</div>
 		</header>
 	);

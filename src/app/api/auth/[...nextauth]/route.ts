@@ -1,12 +1,12 @@
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { type AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 // import TwitterProvider from "next-auth/providers/twitter"
 
 export const authOptions: AuthOptions = {
 	providers: [
 		GoogleProvider({
-			clientId: process.env.GOOGLE_CLIENT_ID!,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+			clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
 		}),
 		// TwitterProvider({
 		//   clientId: process.env.TWITTER_CLIENT_ID!,
@@ -31,7 +31,7 @@ export const authOptions: AuthOptions = {
 			if (trigger === "update") token.user = session.user;
 			return token;
 		},
-	}
+	},
 };
 
 const handler = NextAuth(authOptions);

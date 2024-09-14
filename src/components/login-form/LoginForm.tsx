@@ -16,9 +16,9 @@ import { getBaseUrl } from "@/lib/utils";
 
 const LoginForm = () => {
 	const { data: session, status } = useSession();
-    const baseUrl = getBaseUrl();
-    console.log(baseUrl);
-    const redirectUrl = baseUrl + "top";
+	const baseUrl = getBaseUrl();
+	console.log(baseUrl);
+	const redirectUrl = `${baseUrl}top`;
 	if (status !== "authenticated") {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-400">
@@ -35,7 +35,9 @@ const LoginForm = () => {
 						<Button
 							variant="outline"
 							className="w-full"
-							onClick={() => signIn("google", {callbackUrl: redirectUrl, prompt: "login" })}
+							onClick={() =>
+								signIn("google", { callbackUrl: redirectUrl, prompt: "login" })
+							}
 						>
 							<FaGoogle className="mr-2 h-4 w-4" />
 							Googleでログイン
