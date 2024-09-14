@@ -28,7 +28,11 @@ const LoginForm = () => {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4">
-						<Button variant="outline" className="w-full" onClick={() => signIn("google", {}, { prompt: "login"})}>
+						<Button
+							variant="outline"
+							className="w-full"
+							onClick={() => signIn("google", {callbackUrl: "/top"}, { prompt: "login" })}
+						>
 							<FaGoogle className="mr-2 h-4 w-4" />
 							Googleでログイン
 						</Button>

@@ -2,12 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Header = () => {
 	const [isOpen, setIsOpen] = useState(false);
+	const handleSignOut = async () => {
+		await signOut({ callbackUrl: "/" });
+	};
 
 	return (
 		<header className="bg-white shadow-md">
@@ -41,13 +45,12 @@ const Header = () => {
 							>
 								設定
 							</Link>
-							<Link
-								href="/logout"
+							<Button
 								className="text-lg font-semibold"
-								onClick={() => setIsOpen(false)}
+								onClick={() => handleSignOut()}
 							>
 								ログアウト
-							</Link>
+							</Button>
 						</nav>
 					</SheetContent>
 				</Sheet>
