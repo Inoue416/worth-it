@@ -22,9 +22,6 @@ export const authOptions: AuthOptions = {
 		async signIn({ user, account, profile, email, credentials }) {
 			return true;
 		},
-		async redirect({ url, baseUrl }) {
-			return baseUrl;
-		},
 		async session({ session, token }) {
 			// Send properties to the client, like an access_token and user id from a provider.
 			session.user = { ...token };
