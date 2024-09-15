@@ -8,7 +8,7 @@ export type PostItemProps = {
 	price: number;
 	likes: number;
 	links: string;
-    category: string;
+	category: string;
 };
 
 import { Categories } from "@/defines/categories";
@@ -22,7 +22,7 @@ const dummyProducts: PostItemProps[] = [
 		price: 250000,
 		likes: 15,
 		links: "https://www.google.com/",
-        category: Categories[1].label
+		category: Categories[1].label,
 	},
 	{
 		id: 2,
@@ -33,7 +33,7 @@ const dummyProducts: PostItemProps[] = [
 		price: 120000,
 		likes: 42,
 		links: "https://www.google.com/",
-        category: Categories[0].label
+		category: Categories[0].label,
 	},
 	{
 		id: 3,
@@ -43,7 +43,7 @@ const dummyProducts: PostItemProps[] = [
 		price: 180000,
 		likes: 28,
 		links: "https://www.google.com/",
-        category: Categories[1].label
+		category: Categories[1].label,
 	},
 	{
 		id: 4,
@@ -54,7 +54,7 @@ const dummyProducts: PostItemProps[] = [
 		price: 220000,
 		likes: 36,
 		links: "https://www.google.com/",
-        category: Categories[0].label
+		category: Categories[0].label,
 	},
 	{
 		id: 5,
@@ -65,7 +65,7 @@ const dummyProducts: PostItemProps[] = [
 		price: 45000,
 		likes: 19,
 		links: "https://www.google.com/",
-        category: Categories[0].label
+		category: Categories[0].label,
 	},
 	{
 		id: 6,
@@ -75,7 +75,7 @@ const dummyProducts: PostItemProps[] = [
 		price: 150000,
 		likes: 23,
 		links: "https://www.google.com/",
-        category: Categories[0].label
+		category: Categories[0].label,
 	},
 ];
 

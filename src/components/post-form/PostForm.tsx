@@ -142,7 +142,11 @@ const PostForm = () => {
 											<SelectValue placeholder="カテゴリーを選択" />
 										</SelectTrigger>
 										<SelectContent>
-                                            {Categories.map((item) => <SelectItem value={item.value}>{item.label}</SelectItem>)}
+											{Categories.map((item, idx) => (
+												<SelectItem key={idx.toString()} value={item.value}>
+													{item.label}
+												</SelectItem>
+											))}
 										</SelectContent>
 									</Select>
 								)}

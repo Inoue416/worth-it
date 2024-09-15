@@ -14,7 +14,7 @@ export const PostItem = ({
 	price,
 	links,
 	likes: initialLikes,
-    category
+	category,
 }: PostItemProps) => {
 	const [likes, setLikes] = useState(initialLikes);
 
@@ -38,7 +38,7 @@ export const PostItem = ({
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 				</div>
-                <div className="flex items-center justify-between mb-2">
+				<div className="flex items-center justify-between mb-2">
 					<h3 className="text-lg font-semibold truncate flex-grow">{title}</h3>
 					<div className="flex items-center space-x-1 text-sm text-gray-500">
 						<Tag className="h-4 w-4" />
