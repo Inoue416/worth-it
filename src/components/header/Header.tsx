@@ -46,7 +46,7 @@ const Header = () => {
 										className="text-lg font-semibold"
 										onClick={() => setIsOpen(false)}
 									>
-										投稿
+										投稿する
 									</Link>
 									<Button
 										className="text-lg font-semibold"

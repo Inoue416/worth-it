@@ -6,7 +6,7 @@ export type SubmitPostDto = {
 	link: string;
 	category: string;
 	// DBに合わせている
-	image_url: string;
+	imageUrl: string;
 };
 
 export type GetPostDto = {
@@ -16,6 +16,6 @@ export type GetPostDto = {
 	price: number;
 	link: string;
 	category: string;
-	image: string;
+	imageUrl: string;
 	updated_at: Date;
 };
