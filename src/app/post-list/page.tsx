@@ -73,17 +73,17 @@ const dummyProducts: PostItemProps[] = [
 
 export default function Page() {
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
-			<div className="max-w-7xl mx-auto">
-				<h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">
-					みんなの投稿一覧
-				</h1>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-					{dummyProducts.map((product) => (
-						<PostItem key={product.id} {...product} />
-					))}
-				</div>
+		// <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
+		<div className="max-w-7xl mx-auto">
+			<h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">
+				みんなの投稿一覧
+			</h1>
+			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+				{dummyProducts.map((product) => (
+					<PostItem key={product.id} {...product} />
+				))}
 			</div>
 		</div>
+		// </div>
 	);
 }

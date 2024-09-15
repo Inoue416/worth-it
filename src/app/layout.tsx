@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/header/Header";
 import NextAuthProvider from "./providers/NextAuthProvider";
+import { Suspense } from "react";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -30,8 +31,12 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<Header />
-				<NextAuthProvider>{children}</NextAuthProvider>
+				<NextAuthProvider>
+					<Header />
+					<div className="min-h-screen bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-400 py-12 px-4 sm:px-6 lg:px-8">
+						{children}
+					</div>
+				</NextAuthProvider>
 			</body>
 		</html>
 	);
