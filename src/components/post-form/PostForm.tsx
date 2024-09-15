@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from 'next/navigation'
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -17,6 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner"
 import { Categories } from "@/defines/categories";
 
 import {
@@ -27,6 +29,8 @@ import {
 	FileText,
 	Tag,
 } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
+import { SubmitPostDto } from "@/dtos/PostDto";
 
 const formSchema = z.object({
 	title: z
@@ -48,6 +52,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const PostForm = () => {
+    const router = useRouter();
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const {
 		register,
@@ -60,13 +65,38 @@ const PostForm = () => {
 	});
 
 	const onSubmit = async (data: FormData) => {
-		console.log(data);
+		const userInfo = await getCurrentUser();
 		// toast({
 		// 	title: "商品が投稿されました",
 		// 	description: "商品の投稿が完了しました。",
 		// });
-		reset();
-		setImagePreview(null);
+		const submitData: SubmitPostDto = {
+			email: userInfo?.email ?? "",
+			title: data.title,
+			appealPoint: data.appealPoint,
+			price: data.price,
+			link: data.link,
+			category: data.category,
+			// TODO: 現状、画像アップロード機能は使えないのでダミーを
+			imageUrl: "/placeholder.svg?height=200&width=300",
+		};
+		const res = await fetch("/api/post", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(submitData),
+		});
+        const responseData = await res.json();
+		if (!res.ok && res.status !== 201) {
+			console.error("error: ", responseData.message);
+            toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
+		} else {
+            reset();
+            setImagePreview(null);
+            toast.success("投稿の登録に成功しました。");
+            router.push("/post-list");
+        }
 	};
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,8 +166,8 @@ const PostForm = () => {
 							<Controller
 								name="category"
 								control={control}
-								render={({ field }) => (
-									<Select onValueChange={field.onChange} value={field.value}>
+								render={({ field: { onChange, value } }) => (
+									<Select onValueChange={onChange} value={value}>
 										<SelectTrigger className="w-full">
 											<SelectValue placeholder="カテゴリーを選択" />
 										</SelectTrigger>

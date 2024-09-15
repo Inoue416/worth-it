@@ -1,89 +1,80 @@
+"use server";
 // pages/api/posts.ts
+import type { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
+import { getSession } from "@/lib/auth";
+import { prismaClient } from "@/lib/prismaClientProvider";
+import { FetchLimit } from "@/defines/posts";
+import type { GetPostDto, SubmitPostDto } from "@/dtos/PostDto";
 
-import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from 'next-auth/react';
-import { prismaClient } from '@/lib/prismaClientProvider';
-import { FetchLimit } from '@/defines/posts';
-import { GetPostDto, SubmitPostDto } from '@/dtos/PostDto';
-
-const prisma = new prismaClient;
-
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const session = await getSession({ req });
-
-  if (!session) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  switch (req.method) {
-    case 'GET':
-      return handleGET(req, res, session);
-    case 'POST':
-      return handlePOST(req, res, session);
-    default:
-      res.setHeader('Allow', ['GET', 'POST']);
-      res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
-}
+const prisma = prismaClient;
 
 export type GetPostType = {
-  posts: Array<GetPostDto>;
-  nowOffset: number;
+	posts: Array<GetPostDto>;
+	nowOffset: number;
 };
 
-async function handleGET(req: NextApiRequest, res: NextApiResponse, session: any) {
-  const { nowOffset = "0" } = req.query;
-  const nowOffsetNumber = parseInt(nowOffset as string, 10);
-  const skip = nowOffsetNumber * FetchLimit;
+async function handleGET(req: NextApiRequest, res: NextApiResponse) {
+	const session = await getSession();
+	const { nowOffset = "0" } = req.query;
+	const nowOffsetNumber = Number.parseInt(nowOffset as string, 10);
+	const skip = nowOffsetNumber * FetchLimit;
 
-  try {
-    const posts: Array<GetPostDto> = await prisma.post.findMany({
-        select: {
-            id: true,
-            title: true,
-            appealPoint: true,
-            price: true,
-            link: true,
-            category: true,
-            image_url: true,
-            updated_at: true,
-        },
-        // TODO: 今後Whereでカテゴリを区切るようにする
-    //   where: {
-    //   },
-        skip: skip,
-      take: FetchLimit,
-      orderBy: { updatedAt: 'desc' },
-    });
-    const nextOffset = nowOffsetNumber + 1;
-    res.status(200).json({
-      posts,
-      nowOffset: nextOffset,
-    });
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    res.status(500).json({ message: 'Error fetching posts' });
-  }
+	try {
+		const posts: Array<GetPostDto> = await prisma.post.findMany({
+			select: {
+				id: true,
+				title: true,
+				appealPoint: true,
+				price: true,
+				link: true,
+				category: true,
+				image_url: true,
+				updated_at: true,
+			},
+			// TODO: 今後Whereでカテゴリを区切るようにする
+			//   where: {
+			//   },
+			skip: skip,
+			take: FetchLimit,
+			orderBy: { updatedAt: "desc" },
+		});
+		const nextOffset = nowOffsetNumber + 1;
+		res.status(200).json({
+			posts,
+			nowOffset: nextOffset,
+		});
+	} catch (error) {
+		console.error("Error fetching posts:", error);
+		res.status(500).json({ message: "Error fetching posts" });
+	}
 }
 
+async function handlePOST(req: NextRequest) {
+	const session = await getSession();
+	const postData: SubmitPostDto = await req.json();
+	if (!session) {
+		return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+	}
 
-async function handlePOST(req: NextApiRequest, res: NextApiResponse, session: any) {
-  const postData: SubmitPostDto = req.body;
+	try {
+		await prisma.post.create({
+			data: {
+				email: postData.email,
+	            title: postData.title,
+	            appealPoint: postData.appealPoint,
+	            price: postData.price,
+	            link: postData.link,
+	            category: postData.category,
+	            imageUrl: postData.imageUrl,
+			},
+		});
 
-  if (!session) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  try {
-    await prisma.post.create({
-      data: {
-        ...postData
-      },
-    });
-
-    res.status(201).json({ message: "Success create post." });
-  } catch (error) {
-    console.error('Error creating post:', error);
-    res.status(500).json({ message: 'Error creating post' });
-  }
+		return NextResponse.json({ message: "Success create post." }, { status: 201 });
+	} catch (error) {
+		console.error("Error creating post:", error);
+		return NextResponse.json({ message: "Error creating post" }, { status: 500 });
+	}	
 }
+
+export { handleGET as GET, handlePOST as POST };

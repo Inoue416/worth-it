@@ -30,7 +30,7 @@ model Post {
   email String
   title String
   appealPoint String
-  price String
+  price Int
   link String
   category String
   imageUrl String
