@@ -7,6 +7,12 @@ import Loading from "@/components/loading/Loading";
 export default function Home() {
 	const { data: session, status } = useSession();
 	if (status === "loading") return <Loading />;
+
+	const fetchHelloWorld = async () => {
+		const res = await fetch("/api/hello");
+		const { message } = await res.json();
+		console.log("Fetch DB Result: ", message);
+	};
 	return (
 		<>
 			<div className="min-h-screen flex flex-col items-center justify-center">
@@ -44,6 +50,12 @@ export default function Home() {
 								ログイン
 							</Button>
 						</Link>
+						<Button
+							className="bg-gray-800 text-white hover:bg-gray-700 px-8 py-5 rounded-full text-lg font-semibold transition-colors duration-200"
+							onClick={() => {}}
+						>
+							DB接続テスト用
+						</Button>
 					</>
 				)}
 			</div>

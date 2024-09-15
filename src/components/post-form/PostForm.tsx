@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,14 +11,26 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-// import { toast } from "@/hooks/use-toast";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Categories } from "@/defines/categories";
+
 import {
 	Upload,
-	DollarSign,
+	JapaneseYen,
 	Link as LinkIcon,
 	Type,
 	FileText,
+	Tag,
 } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
+import type { SubmitPostDto } from "@/dtos/PostDto";
 
 const formSchema = z.object({
 	title: z
@@ -30,6 +43,7 @@ const formSchema = z.object({
 		.max(500, "アピールポイントは500文字以内で入力してください"),
 	price: z.number().min(0, "価格は0以上で入力してください"),
 	link: z.string().url("有効なURLを入力してください"),
+	category: z.string().min(1, "カテゴリーを選択してください"),
 	// image: z
 	// 	.instanceof(FileList)
 	// 	.nullable(),
@@ -38,10 +52,12 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const PostForm = () => {
+	const router = useRouter();
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const {
 		register,
 		handleSubmit,
+		control,
 		formState: { errors, isValid, isSubmitting },
 		reset,
 	} = useForm<FormData>({
@@ -49,13 +65,38 @@ const PostForm = () => {
 	});
 
 	const onSubmit = async (data: FormData) => {
-		console.log(data);
+		const userInfo = await getCurrentUser();
 		// toast({
 		// 	title: "商品が投稿されました",
 		// 	description: "商品の投稿が完了しました。",
 		// });
-		reset();
-		setImagePreview(null);
+		const submitData: SubmitPostDto = {
+			email: userInfo?.email ?? "",
+			title: data.title,
+			appealPoint: data.appealPoint,
+			price: data.price,
+			link: data.link,
+			category: data.category,
+			// TODO: 現状、画像アップロード機能は使えないのでダミーを
+			imageUrl: "/placeholder.svg?height=200&width=300",
+		};
+		const res = await fetch("/api/post", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(submitData),
+		});
+		const responseData = await res.json();
+		if (!res.ok && res.status !== 201) {
+			console.error("error: ", responseData.message);
+			toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
+		} else {
+			reset();
+			setImagePreview(null);
+			toast.success("投稿の登録に成功しました。");
+			router.push("/post-list");
+		}
 	};
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +157,39 @@ const PostForm = () => {
 
 						<div className="space-y-2">
 							<Label
+								htmlFor="category"
+								className="text-sm font-medium text-gray-700 flex items-center"
+							>
+								<Tag className="w-4 h-4 mr-2" />
+								カテゴリー
+							</Label>
+							<Controller
+								name="category"
+								control={control}
+								render={({ field: { onChange, value } }) => (
+									<Select onValueChange={onChange} value={value}>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="カテゴリーを選択" />
+										</SelectTrigger>
+										<SelectContent>
+											{Categories.map((item, idx) => (
+												<SelectItem key={idx.toString()} value={item.value}>
+													{item.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								)}
+							/>
+							{errors.category && (
+								<p className="text-sm text-red-500 mt-1">
+									{errors.category.message}
+								</p>
+							)}
+						</div>
+
+						<div className="space-y-2">
+							<Label
 								htmlFor="appealPoint"
 								className="text-sm font-medium text-gray-700 flex items-center"
 							>
@@ -139,7 +213,7 @@ const PostForm = () => {
 								htmlFor="price"
 								className="text-sm font-medium text-gray-700 flex items-center"
 							>
-								<DollarSign className="w-4 h-4 mr-2" />
+								<JapaneseYen className="w-4 h-4 mr-2" />
 								値段
 							</Label>
 							<Input

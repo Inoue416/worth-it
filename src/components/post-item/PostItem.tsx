@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Heart, ExternalLink } from "lucide-react";
+import { Heart, ExternalLink, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { PostItemProps } from "@/app/post-list/page";
 
 export const PostItem = ({
-	name,
+	title,
 	appealPoint,
 	imageUrl,
 	price,
 	links,
 	likes: initialLikes,
+	category,
 }: PostItemProps) => {
 	const [likes, setLikes] = useState(initialLikes);
 
@@ -31,13 +32,19 @@ export const PostItem = ({
 				<div className="relative w-full h-48 mb-4 overflow-hidden rounded-md">
 					<Image
 						src={imageUrl}
-						alt={name}
+						alt={title}
 						fill
 						className="object-cover transition-transform duration-300 group-hover:scale-110"
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 				</div>
-				<h3 className="text-lg font-semibold mb-2 truncate">{name}</h3>
+				<div className="flex items-center justify-between mb-2">
+					<h3 className="text-lg font-semibold truncate flex-grow">{title}</h3>
+					<div className="flex items-center space-x-1 text-sm text-gray-500">
+						<Tag className="h-4 w-4" />
+						<span>{category}</span>
+					</div>
+				</div>
 				<p className="text-sm text-gray-600 mb-3 line-clamp-2">{appealPoint}</p>
 				<div className="flex items-center justify-between">
 					<p className="text-xl font-bold text-emerald-600">
