@@ -7,6 +7,7 @@ export type PostItemProps = {
 	imageUrl: string;
 	price: number;
 	likes: number;
+	links: string;
 };
 
 const dummyProducts: PostItemProps[] = [
@@ -18,6 +19,7 @@ const dummyProducts: PostItemProps[] = [
 		imageUrl: "/placeholder.svg?height=200&width=300",
 		price: 250000,
 		likes: 15,
+		links: "https://www.google.com/",
 	},
 	{
 		id: 2,
@@ -27,6 +29,7 @@ const dummyProducts: PostItemProps[] = [
 		imageUrl: "/placeholder.svg?height=200&width=300",
 		price: 120000,
 		likes: 42,
+		links: "https://www.google.com/",
 	},
 	{
 		id: 3,
@@ -35,6 +38,7 @@ const dummyProducts: PostItemProps[] = [
 		imageUrl: "/placeholder.svg?height=200&width=300",
 		price: 180000,
 		likes: 28,
+		links: "https://www.google.com/",
 	},
 	{
 		id: 4,
@@ -44,6 +48,7 @@ const dummyProducts: PostItemProps[] = [
 		imageUrl: "/placeholder.svg?height=200&width=300",
 		price: 220000,
 		likes: 36,
+		links: "https://www.google.com/",
 	},
 	{
 		id: 5,
@@ -53,6 +58,7 @@ const dummyProducts: PostItemProps[] = [
 		imageUrl: "/placeholder.svg?height=200&width=300",
 		price: 45000,
 		likes: 19,
+		links: "https://www.google.com/",
 	},
 	{
 		id: 6,
@@ -61,6 +67,7 @@ const dummyProducts: PostItemProps[] = [
 		imageUrl: "/placeholder.svg?height=200&width=300",
 		price: 150000,
 		likes: 23,
+		links: "https://www.google.com/",
 	},
 ];
 
