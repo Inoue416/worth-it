@@ -17,6 +17,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Categories } from "@/defines/categories";
+
 import {
 	Upload,
 	JapaneseYen,
@@ -140,17 +142,7 @@ const PostForm = () => {
 											<SelectValue placeholder="カテゴリーを選択" />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value="electronics">電化製品</SelectItem>
-											<SelectItem value="fashion">ファッション</SelectItem>
-											<SelectItem value="books">書籍</SelectItem>
-											<SelectItem value="home">ホーム&キッチン</SelectItem>
-											<SelectItem value="beauty">美容&健康</SelectItem>
-											<SelectItem value="sports">
-												スポーツ&アウトドア
-											</SelectItem>
-											<SelectItem value="toys">おもちゃ&ゲーム</SelectItem>
-											<SelectItem value="food">食品&飲料</SelectItem>
-											<SelectItem value="other">その他</SelectItem>
+                                            {Categories.map((item) => <SelectItem value={item.value}>{item.label}</SelectItem>)}
 										</SelectContent>
 									</Select>
 								)}
