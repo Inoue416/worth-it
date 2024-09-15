@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,13 +10,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-// import { toast } from "@/hooks/use-toast";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Upload,
-	DollarSign,
+	JapaneseYen,
 	Link as LinkIcon,
 	Type,
 	FileText,
+	Tag,
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -30,6 +37,7 @@ const formSchema = z.object({
 		.max(500, "アピールポイントは500文字以内で入力してください"),
 	price: z.number().min(0, "価格は0以上で入力してください"),
 	link: z.string().url("有効なURLを入力してください"),
+	category: z.string().min(1, "カテゴリーを選択してください"),
 	// image: z
 	// 	.instanceof(FileList)
 	// 	.nullable(),
@@ -42,6 +50,7 @@ const PostForm = () => {
 	const {
 		register,
 		handleSubmit,
+		control,
 		formState: { errors, isValid, isSubmitting },
 		reset,
 	} = useForm<FormData>({
@@ -116,6 +125,45 @@ const PostForm = () => {
 
 						<div className="space-y-2">
 							<Label
+								htmlFor="category"
+								className="text-sm font-medium text-gray-700 flex items-center"
+							>
+								<Tag className="w-4 h-4 mr-2" />
+								カテゴリー
+							</Label>
+							<Controller
+								name="category"
+								control={control}
+								render={({ field }) => (
+									<Select onValueChange={field.onChange} value={field.value}>
+										<SelectTrigger className="w-full">
+											<SelectValue placeholder="カテゴリーを選択" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="electronics">電化製品</SelectItem>
+											<SelectItem value="fashion">ファッション</SelectItem>
+											<SelectItem value="books">書籍</SelectItem>
+											<SelectItem value="home">ホーム&キッチン</SelectItem>
+											<SelectItem value="beauty">美容&健康</SelectItem>
+											<SelectItem value="sports">
+												スポーツ&アウトドア
+											</SelectItem>
+											<SelectItem value="toys">おもちゃ&ゲーム</SelectItem>
+											<SelectItem value="food">食品&飲料</SelectItem>
+											<SelectItem value="other">その他</SelectItem>
+										</SelectContent>
+									</Select>
+								)}
+							/>
+							{errors.category && (
+								<p className="text-sm text-red-500 mt-1">
+									{errors.category.message}
+								</p>
+							)}
+						</div>
+
+						<div className="space-y-2">
+							<Label
 								htmlFor="appealPoint"
 								className="text-sm font-medium text-gray-700 flex items-center"
 							>
@@ -139,7 +187,7 @@ const PostForm = () => {
 								htmlFor="price"
 								className="text-sm font-medium text-gray-700 flex items-center"
 							>
-								<DollarSign className="w-4 h-4 mr-2" />
+								<JapaneseYen className="w-4 h-4 mr-2" />
 								値段
 							</Label>
 							<Input
