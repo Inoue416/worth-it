@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,7 +18,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { Categories } from "@/defines/categories";
 
 import {
@@ -30,7 +30,7 @@ import {
 	Tag,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { SubmitPostDto } from "@/dtos/PostDto";
+import type { SubmitPostDto } from "@/dtos/PostDto";
 
 const formSchema = z.object({
 	title: z
@@ -52,7 +52,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const PostForm = () => {
-    const router = useRouter();
+	const router = useRouter();
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
 	const {
 		register,
@@ -87,16 +87,16 @@ const PostForm = () => {
 			},
 			body: JSON.stringify(submitData),
 		});
-        const responseData = await res.json();
+		const responseData = await res.json();
 		if (!res.ok && res.status !== 201) {
 			console.error("error: ", responseData.message);
-            toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
+			toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
 		} else {
-            reset();
-            setImagePreview(null);
-            toast.success("投稿の登録に成功しました。");
-            router.push("/post-list");
-        }
+			reset();
+			setImagePreview(null);
+			toast.success("投稿の登録に成功しました。");
+			router.push("/post-list");
+		}
 	};
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
