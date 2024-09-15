@@ -1,30 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { Heart, ExternalLink, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import type { PostItemProps } from "@/app/post-list/page";
+import type { GetPostDto } from "@/dtos/PostDto";
+import { toast } from "sonner";
 
 export const PostItem = ({
+	id,
 	title,
 	appealPoint,
 	imageUrl,
 	price,
-	links,
-	likes: initialLikes,
+	link,
 	category,
-}: PostItemProps) => {
-	const [likes, setLikes] = useState(initialLikes);
-
+	updatedAt,
+}: GetPostDto) => {
+	// TODO: いいね数をDBから取得する
+	const [likes, setLikes] = useState(0);
+	const [isLike, setIsLike] = useState(false);
 	const handleLike = () => {
-		setLikes((prevLikes) => prevLikes + 1);
-		// ここに実際のいいね処理を追加する（APIコールなど）
+		const response = fetch(`/api/likes?postId=${id}`, {
+			method: "POST",
+		});
+		response
+			.then((item) => {
+				if (item.status !== 200) {
+					return;
+				}
+				setLikes(likes + 1);
+			})
+			.catch((err) => {
+				console.error(err);
+				toast.error("いいねの処理に失敗しました。");
+			});
 	};
 
+	useEffect(() => {
+		const fetchLikes = async () => {
+			const response = await fetch(`/api/likes?postId=${id}`, {
+				method: "GET",
+			});
+			if (response.status !== 200) {
+				return;
+			}
+			const data = await response.json();
+			setLikes(data.likes);
+			setIsLike(data.isLike);
+		};
+		fetchLikes();
+	}, [id]);
+
 	return (
-		<a href={links} target="_blank" rel="noopener noreferrer">
+		<a href={link} target="_blank" rel="noopener noreferrer">
 			<motion.div
 				className="group relative bg-white p-4 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg"
 				whileHover={{ y: -5 }}
@@ -57,7 +87,7 @@ export const PostItem = ({
 						className="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors duration-200"
 					>
 						<Heart
-							className={`h-5 w-5 ${likes > 0 ? "fill-red-500 text-red-500" : ""}`}
+							className={`h-5 w-5 ${isLike ? "fill-red-500 text-red-500" : ""}`}
 						/>
 						<span className="text-sm font-medium">{likes}</span>
 					</Button>

@@ -17,5 +17,5 @@ export type GetPostDto = {
 	link: string;
 	category: string;
 	imageUrl: string;
-	updated_at: Date;
+	updatedAt: Date;
 };
