@@ -1,4 +1,4 @@
-import { PostItem } from "@/components/post-list/PostList"
+import { PostItem } from "@/components/post-item/PostItem"
 
 export type PostItemProps = {
     id: number
