@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { Menu } from "lucide-react";
@@ -9,10 +10,10 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const Header = () => {
 	const [isOpen, setIsOpen] = useState(false);
+	const { data: session, status } = useSession();
 	const handleSignOut = async () => {
 		await signOut({ callbackUrl: "/" });
 	};
-
 	return (
 		<header className="bg-white shadow-md">
 			<div className="container mx-auto px-4 py-2 flex items-center justify-between">
@@ -31,26 +32,34 @@ const Header = () => {
 							>
 								ホーム
 							</Link>
-							<Link
-								href="/profile"
-								className="text-lg font-semibold"
-								onClick={() => setIsOpen(false)}
-							>
-								プロフィール
-							</Link>
-							<Link
-								href="/settings"
-								className="text-lg font-semibold"
-								onClick={() => setIsOpen(false)}
-							>
-								設定
-							</Link>
-							<Button
-								className="text-lg font-semibold"
-								onClick={() => handleSignOut()}
-							>
-								ログアウト
-							</Button>
+							{status === "authenticated" ? (
+								<>
+									<Link
+										href="/post-list"
+										className="text-lg font-semibold"
+										onClick={() => setIsOpen(false)}
+									>
+										投稿一覧
+									</Link>
+									<Link
+										href="/post-form"
+										className="text-lg font-semibold"
+										onClick={() => setIsOpen(false)}
+									>
+										投稿する
+									</Link>
+									<Button
+										className="text-lg font-semibold"
+										onClick={() => handleSignOut()}
+									>
+										ログアウト
+									</Button>
+								</>
+							) : (
+								<Link href="/login">
+									<Button className="text-lg font-semibold">ログイン</Button>
+								</Link>
+							)}
 						</nav>
 					</SheetContent>
 				</Sheet>
