@@ -38,7 +38,7 @@ export default function Page() {
 					method: "GET",
 				},
 			);
-            console.log("http status: ", response.status);
+			console.log("http status: ", response.status);
 			if (response.status !== 200) {
 				const res = await response.json();
 				console.error(res.message);
@@ -70,7 +70,6 @@ export default function Page() {
 		}
 	}, [loading, hasMore]);
 
-    
 	return (
 		<div className="max-w-7xl mx-auto">
 			<h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">

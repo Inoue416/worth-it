@@ -18,21 +18,21 @@ async function handleGET(req: NextRequest) {
 	if (!session) {
 		return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 	}
-    const searchParams = req.nextUrl.searchParams;
+	const searchParams = req.nextUrl.searchParams;
 	const page = searchParams.get("page") ?? "1";
-    const limit = searchParams.get("limit") ?? FetchLimit.toString();
+	const limit = searchParams.get("limit") ?? FetchLimit.toString();
 	const pageNumber = Number.parseInt(page as string, 10);
 	const limitNumber = Number.parseInt(limit as string, 10);
 
 	try {
-		const posts: Array<GetPostDto> = await getPosts(
-			pageNumber,
-			limitNumber,
-		);
+		const posts: Array<GetPostDto> = await getPosts(pageNumber, limitNumber);
 		return NextResponse.json(posts, { status: 200 });
 	} catch (error) {
 		console.error("Error fetching posts:", error);
-		return NextResponse.json({ message: "Error fetching posts" }, { status: 500 });
+		return NextResponse.json(
+			{ message: "Error fetching posts" },
+			{ status: 500 },
+		);
 	}
 }
 

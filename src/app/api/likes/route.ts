@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { createLike, getIsLike, getLikes } from "@/lib/likes";
 
 async function handleGET(req: NextRequest) {
 	const session = await getSession();
 	if (!session) {
-		return NextResponse.json({ message: "Unauthorized" }, { status: 401});
+		return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 	}
-    const searchParams = req.nextUrl.searchParams;
+	const searchParams = req.nextUrl.searchParams;
 	const postId = searchParams.get("postId") ?? "-1";
 	try {
 		const likes = await getLikes(Number.parseInt(postId as string));
@@ -18,7 +18,10 @@ async function handleGET(req: NextRequest) {
 		return NextResponse.json({ likes: likes, isLike: isLike }, { status: 200 });
 	} catch (error) {
 		console.error("Error fetching posts:", error);
-		return NextResponse.json({ message: "Error fetching posts" }, { status: 500 });
+		return NextResponse.json(
+			{ message: "Error fetching posts" },
+			{ status: 500 },
+		);
 	}
 }
 
@@ -27,7 +30,7 @@ async function handlePOST(req: NextRequest) {
 	if (!session) {
 		return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 	}
-    const searchParams = req.nextUrl.searchParams;
+	const searchParams = req.nextUrl.searchParams;
 	const email = session.user?.email;
 	const postId = searchParams.get("postId") ?? "-1";
 	try {
@@ -36,13 +39,21 @@ async function handlePOST(req: NextRequest) {
 			Number.parseInt(postId as string),
 		);
 		if (!result) {
-			return NextResponse.json({ message: "Error creating post" }, { status: 500 });
-		} else {
-			return NextResponse.json({ message: "Success create post." }, { status: 200 });
+			return NextResponse.json(
+				{ message: "Error creating post" },
+				{ status: 500 },
+			);
 		}
+		return NextResponse.json(
+			{ message: "Success create post." },
+			{ status: 200 },
+		);
 	} catch (error) {
 		console.error("Error creating post:", error);
-		return NextResponse.json({ message: "Error creating post" }, { status: 500 });
+		return NextResponse.json(
+			{ message: "Error creating post" },
+			{ status: 500 },
+		);
 	}
 }
 
