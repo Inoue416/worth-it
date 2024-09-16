@@ -44,7 +44,7 @@ const LoginForm = () => {
 
 						<Button variant="outline" className="w-full">
 							<FaXTwitter className="mr-2 h-4 w-4" />
-							Twitterでログイン
+							Coming Soon...
 						</Button>
 					</CardContent>
 				</Card>
