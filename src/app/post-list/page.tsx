@@ -1,95 +1,81 @@
+"use client";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PostItem } from "@/components/post-item/PostItem";
-
-export type PostItemProps = {
-	id: number;
-	title: string;
-	appealPoint: string;
-	imageUrl: string;
-	price: number;
-	likes: number;
-	links: string;
-	category: string;
-};
-
-import { Categories } from "@/defines/categories";
-const dummyProducts: PostItemProps[] = [
-	{
-		id: 1,
-		title: "高級腕時計",
-		appealPoint:
-			"職人技が光る逸品。精巧な機械式ムーブメントを搭載し、洗練されたデザインが特徴です。",
-		imageUrl: "/placeholder.svg?height=200&width=300",
-		price: 250000,
-		likes: 15,
-		links: "https://www.google.com/",
-		category: Categories[1].label,
-	},
-	{
-		id: 2,
-		title: "スマートフォン",
-		appealPoint:
-			"最新テクノロジー搭載。高性能カメラと長時間バッテリーで、あなたの生活をサポートします。",
-		imageUrl: "/placeholder.svg?height=200&width=300",
-		price: 120000,
-		likes: 42,
-		links: "https://www.google.com/",
-		category: Categories[0].label,
-	},
-	{
-		id: 3,
-		title: "デザイナーバッグ",
-		appealPoint: "上質な素材使用。職人の技が光る、長く愛用できる逸品です。",
-		imageUrl: "/placeholder.svg?height=200&width=300",
-		price: 180000,
-		likes: 28,
-		links: "https://www.google.com/",
-		category: Categories[1].label,
-	},
-	{
-		id: 4,
-		title: "ハイエンドノートPC",
-		appealPoint:
-			"パワフルな性能と洗練されたデザイン。クリエイティブワークにも最適です。",
-		imageUrl: "/placeholder.svg?height=200&width=300",
-		price: 220000,
-		likes: 36,
-		links: "https://www.google.com/",
-		category: Categories[0].label,
-	},
-	{
-		id: 5,
-		title: "高級イヤホン",
-		appealPoint:
-			"臨場感ある音質で音楽体験を一新。ノイズキャンセリング機能搭載で没入感抜群です。",
-		imageUrl: "/placeholder.svg?height=200&width=300",
-		price: 45000,
-		likes: 19,
-		links: "https://www.google.com/",
-		category: Categories[0].label,
-	},
-	{
-		id: 6,
-		title: "電動自転車",
-		appealPoint: "長距離走行可能。環境に優しく、快適な乗り心地を実現しました。",
-		imageUrl: "/placeholder.svg?height=200&width=300",
-		price: 150000,
-		likes: 23,
-		links: "https://www.google.com/",
-		category: Categories[0].label,
-	},
-];
+import type { GetPostDto } from "@/dtos/PostDto";
+import { FetchLimit } from "@/defines/posts";
+import { toast } from "sonner";
+import InfiniteScrollLoader from "@/components/loading/InfiniteScrollLoader";
 
 export default function Page() {
+	const [posts, setPosts] = useState<GetPostDto[]>([]);
+	const [page, setPage] = useState(1);
+	const [loading, setLoading] = useState(false);
+	const [hasMore, setHasMore] = useState(true);
+	const observer = useRef<IntersectionObserver | null>(null);
+	const lastPostRef = useRef<HTMLDivElement | null>(null);
+	const initialFetchDone = useRef(false);
+
+	const fetchPosts = useCallback(async (pageNum: number) => {
+		if (initialFetchDone.current && pageNum === 1) return;
+
+		setLoading(true);
+		try {
+			const response = await fetch(
+				`/api/post?page=${pageNum}&limit=${FetchLimit}`,
+				{
+					method: "GET",
+				},
+			);
+			if (!response.ok) {
+				throw new Error("データの取得に失敗しました。");
+			}
+			const data = await response.json();
+			setPosts((prev) => (pageNum === 1 ? data : [...prev, ...data]));
+			setHasMore(data.length === FetchLimit);
+			if (pageNum === 1) initialFetchDone.current = true;
+		} catch (error) {
+			console.error(error);
+			toast.error("データの取得に失敗しました。");
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		fetchPosts(page);
+	}, [page, fetchPosts]);
+
+	useEffect(() => {
+		if (loading) return;
+		if (observer.current) observer.current.disconnect();
+
+		observer.current = new IntersectionObserver((entries) => {
+			if (entries[0].isIntersecting && hasMore) {
+				setPage((prevPage) => prevPage + 1);
+			}
+		});
+
+		if (lastPostRef.current) {
+			observer.current.observe(lastPostRef.current);
+		}
+	}, [loading, hasMore]);
+
 	return (
 		<div className="max-w-7xl mx-auto">
 			<h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">
 				みんなの投稿一覧
 			</h1>
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-				{dummyProducts.map((product) => (
-					<PostItem key={product.id} {...product} />
+				{posts.map((item, index) => (
+					<div
+						key={item.id}
+						ref={posts.length === index + 1 ? lastPostRef : null}
+					>
+						<PostItem {...item} />
+					</div>
 				))}
 			</div>
+			{loading && <InfiniteScrollLoader />}
 		</div>
 	);
 }

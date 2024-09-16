@@ -17,8 +17,7 @@ import { getBaseUrl } from "@/lib/utils";
 const LoginForm = () => {
 	const { data: session, status } = useSession();
 	const baseUrl = getBaseUrl();
-	console.log(baseUrl);
-	const redirectUrl = `${baseUrl}top`;
+	const redirectUrl = `${baseUrl}`;
 	if (status !== "authenticated") {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-400">
