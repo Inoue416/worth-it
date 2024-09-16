@@ -1,21 +1,10 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PostItem } from "@/components/post-item/PostItem";
 import type { GetPostDto } from "@/dtos/PostDto";
 import { FetchLimit } from "@/defines/posts";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
-export type PostItemProps = {
-	id: number;
-	title: string;
-	appealPoint: string;
-	imageUrl: string;
-	price: number;
-	likes: number;
-	links: string;
-	category: string;
-};
+import InfiniteScrollLoader from "@/components/loading/InfiniteScrollLoader";
 
 export default function Page() {
 	const [posts, setPosts] = useState<GetPostDto[]>([]);
@@ -23,37 +12,38 @@ export default function Page() {
 	const [loading, setLoading] = useState(false);
 	const [hasMore, setHasMore] = useState(true);
 	const observer = useRef<IntersectionObserver | null>(null);
-
-	// データを取得する関数
-
-	// スクロール監視用のRef
 	const lastPostRef = useRef<HTMLDivElement | null>(null);
+	const initialFetchDone = useRef(false);
 
-	useEffect(() => {
-		const fetchPosts = async (page: number) => {
-			setLoading(true);
+	const fetchPosts = useCallback(async (pageNum: number) => {
+		if (initialFetchDone.current && pageNum === 1) return;
+
+		setLoading(true);
+		try {
 			const response = await fetch(
-				`/api/post?page=${page}&limit=${FetchLimit}`,
+				`/api/post?page=${pageNum}&limit=${FetchLimit}`,
 				{
 					method: "GET",
 				},
 			);
-			console.log("http status: ", response.status);
-			if (response.status !== 200) {
-				const res = await response.json();
-				console.error(res.message);
-				toast.error("データの取得に失敗しました。");
+			if (!response.ok) {
+				throw new Error("データの取得に失敗しました。");
 			}
 			const data = await response.json();
-			setPosts((prev) => [...prev, ...data]);
+			setPosts((prev) => (pageNum === 1 ? data : [...prev, ...data]));
+			setHasMore(data.length === FetchLimit);
+			if (pageNum === 1) initialFetchDone.current = true;
+		} catch (error) {
+			console.error(error);
+			toast.error("データの取得に失敗しました。");
+		} finally {
 			setLoading(false);
-			if (data.length < 20) {
-				setHasMore(false);
-			}
-		};
+		}
+	}, []);
 
+	useEffect(() => {
 		fetchPosts(page);
-	}, [page]);
+	}, [page, fetchPosts]);
 
 	useEffect(() => {
 		if (loading) return;
@@ -81,10 +71,11 @@ export default function Page() {
 						key={item.id}
 						ref={posts.length === index + 1 ? lastPostRef : null}
 					>
-						<PostItem key={item.id} {...item} />
+						<PostItem {...item} />
 					</div>
 				))}
 			</div>
+			{loading && <InfiniteScrollLoader />}
 		</div>
 	);
 }
