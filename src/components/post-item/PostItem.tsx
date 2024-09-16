@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Heart, ExternalLink, Tag } from "lucide-react";
 import { motion } from "framer-motion";
@@ -16,28 +16,17 @@ export const PostItem = ({
 	price,
 	link,
 	category,
-	// TODO: 将来的には表示したい
-	updatedAt,
 }: GetPostDto) => {
-	// TODO: いいね数をDBから取得する
 	const [likes, setLikes] = useState(0);
 	const [isLike, setIsLike] = useState(false);
+
 	const handleLike = () => {
-		const response = fetch(`/api/likes?postId=${id}`, {
-			method: "POST",
-		});
-		response
-			.then((item) => {
-				if (item.status !== 200) {
-					return;
+		fetch(`/api/likes?postId=${id}`, { method: "POST" })
+			.then((response) => {
+				if (response.status === 200) {
+					setLikes((prev) => (isLike ? prev - 1 : prev + 1));
+					setIsLike((prev) => !prev);
 				}
-				if (isLike) {
-					setLikes(likes - 1);
-					setIsLike(!isLike);
-					return;
-				}
-				setLikes(likes + 1);
-				setIsLike(!isLike);
 			})
 			.catch((err) => {
 				console.error(err);
@@ -46,26 +35,26 @@ export const PostItem = ({
 	};
 
 	useEffect(() => {
-		const fetchLikes = async () => {
-			const response = await fetch(`/api/likes?postId=${id}`, {
-				method: "GET",
-			});
-			if (response.status !== 200) {
-				return;
-			}
-			const data = await response.json();
-			setLikes(data.likes);
-			setIsLike(data.isLike);
-		};
-		fetchLikes();
+		fetch(`/api/likes?postId=${id}`)
+			.then((response) => response.json())
+			.then((data) => {
+				setLikes(data.likes);
+				setIsLike(data.isLike);
+			})
+			.catch((err) => console.error(err));
 	}, [id]);
 
 	return (
 		<motion.div
-			className="group relative bg-white p-4 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg"
+			className="group relative bg-white p-4 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg h-[400px] flex flex-col"
 			whileHover={{ y: -5 }}
 		>
-			<a href={link} target="_blank" rel="noopener noreferrer">
+			<a
+				href={link}
+				target="_blank"
+				rel="noopener noreferrer"
+				className="flex-grow flex flex-col"
+			>
 				<div className="relative w-full h-48 mb-4 overflow-hidden rounded-md">
 					<Image
 						src={imageUrl}
@@ -82,9 +71,11 @@ export const PostItem = ({
 						<span>{category}</span>
 					</div>
 				</div>
-				<p className="text-sm text-gray-600 mb-3 line-clamp-2">{appealPoint}</p>
+				<p className="text-sm text-gray-600 mb-3 line-clamp-2 flex-grow">
+					{appealPoint}
+				</p>
 			</a>
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between mt-auto">
 				<p className="text-xl font-bold text-emerald-600">
 					¥{price.toLocaleString()}
 				</p>
