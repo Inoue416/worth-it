@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getBaseUrl() {
-	const baseUrl = process.env.APP_URL;
+	const baseUrl = process.env.NEXT_PUBLIC_VERCEL_URL || 'localhost:3000'
 	console.log("baseUrl", baseUrl);
 	return baseUrl ? baseUrl : "";
 }
