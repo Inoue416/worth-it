@@ -22,7 +22,7 @@
     "ignoreDeps": [],
     "assignees": ["i-yuya"],
     "reviewers": ["i-yuya"],
-    "baseBranches": ["main"],
+    "baseBranches": ["develop"],
     "labels": ["dependencies"],
     "rangeStrategy": "pin",
     "packageManager": "pnpm",
