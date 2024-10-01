@@ -25,5 +25,12 @@
     "labels": ["dependencies"],
     "rangeStrategy": "pin",
     "packageManager": "pnpm",
-    "pnpmShrinkwrap": true
+    "pnpmShrinkwrap": true,
+    "prHourlyLimit": 0,
+    "prConcurrentLimit": 0,
+    "automerge": false,
+    "lockFileMaintenance": {
+      "enabled": true,
+      "schedule": ["after 7pm"]
+    }
   }
