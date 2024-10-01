@@ -1,11 +1,11 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
-      "config:base",
-      ":disableDependencyDashboard"
+      "config:base"
     ],
+    "baseBranches": ["develop"],
     "timezone": "Asia/Tokyo",
-    "schedule": ["every day"],
+    "schedule": ["after 7pm"],
     "packageRules": [
       {
         "matchPackagePatterns": [
@@ -15,14 +15,13 @@
           "minor",
           "patch"
         ],
-        "groupName": "all non-major dependencies",
-        "groupSlug": "all-minor-patch"
+        "groupName": "all dependencies",
+        "groupSlug": "all"
       }
     ],
     "ignoreDeps": [],
     "assignees": ["i-yuya"],
     "reviewers": ["i-yuya"],
-    "baseBranches": ["develop"],
     "labels": ["dependencies"],
     "rangeStrategy": "pin",
     "packageManager": "pnpm",
