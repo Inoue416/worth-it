@@ -4,21 +4,19 @@ echo "VERCEL_GIT_COMMIT_REF: $VERCEL_GIT_COMMIT_REF"
 echo "VERCEL_GIT_COMMIT_MESSAGE: $VERCEL_GIT_COMMIT_MESSAGE"
 
 # 許可するブランチのリスト
-ALLOWED_BRANCHES=("develop")
+ALLOWED_BRANCHE="develop"
+# マージコミットメッセージから元のブランチ名を抽出
+MERGE_BRANCH=$(echo "$VERCEL_GIT_COMMIT_MESSAGE" | grep -o "$ALLOWED_BRANCHE")
+echo "MERGE_BRANCH: $MERGE_BRANCH"
 
 # mainブランチへのマージかどうかを確認
 if [[ "$VERCEL_GIT_COMMIT_REF" == "main" ]]; then
-  # マージコミットメッセージから元のブランチ名を抽出
-  MERGE_BRANCH=$(echo "$VERCEL_GIT_COMMIT_MESSAGE" | grep -oP "Merge branch '\K[^']+")
-  
-  # 許可されたブランチからのマージかどうかを確認
-  if [[ " ${ALLOWED_BRANCHES[@]} " =~ " ${MERGE_BRANCH} " ]]; then
+  if [ -n "$MERGE_BRANCH" ]; then
     echo "✅ - ビルドを続行します (${MERGE_BRANCH}からのマージ)"
     exit 1
   else
-    echo "🛑 - ビルドをキャンセルしました (許可されていないブランチ: ${MERGE_BRANCH})"
+    echo "🛑 - ビルドをキャンセルしました (許可されていないブランチ)"
     exit 0
-  fi
 else
   echo "🛑 - mainブランチではないためビルドをキャンセルしました"
   exit 0
