@@ -12,6 +12,7 @@
           "*"
         ],
         "matchUpdateTypes": [
+          "major",
           "minor",
           "patch"
         ],
@@ -24,8 +25,6 @@
     "reviewers": ["i-yuya"],
     "labels": ["dependencies"],
     "rangeStrategy": "pin",
-    "packageManager": "pnpm",
-    "pnpmShrinkwrap": true,
     "prHourlyLimit": 0,
     "prConcurrentLimit": 0,
     "automerge": false,
