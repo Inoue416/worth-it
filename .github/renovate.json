@@ -5,7 +5,7 @@
     ],
     "baseBranches": ["develop"],
     "timezone": "Asia/Tokyo",
-    "schedule": ["after 7pm"],
+    "schedule": ["after 7pm on friday"],
     "packageRules": [
       {
         "matchPackagePatterns": [
@@ -30,6 +30,6 @@
     "automerge": false,
     "lockFileMaintenance": {
       "enabled": true,
-      "schedule": ["after 7pm"]
+      "schedule": ["after 7pm on friday"]
     }
   }
