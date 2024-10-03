@@ -17,6 +17,7 @@ if [[ "$VERCEL_GIT_COMMIT_REF" == "main" ]]; then
   else
     echo "🛑 - ビルドをキャンセルしました (許可されていないブランチ)"
     exit 0
+  fi
 else
   echo "🛑 - mainブランチではないためビルドをキャンセルしました"
   exit 0
