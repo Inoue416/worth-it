@@ -1,5 +1,6 @@
 import type { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import TwitterProvider from "next-auth/providers/twitter";
 import { prismaClient } from "./lib/prismaClientProvider";
 
 export const authOptions: AuthOptions = {
@@ -8,10 +9,11 @@ export const authOptions: AuthOptions = {
 			clientId: process.env.GOOGLE_CLIENT_ID ?? "",
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
 		}),
-		// TwitterProvider({
-		//   clientId: process.env.TWITTER_CLIENT_ID!,
-		//   clientSecret: process.env.TWITTER_CLIENT_SECRET!,
-		// }),
+		TwitterProvider({
+			clientId: process.env.TWITTER_CLIENT_ID ?? "",
+			clientSecret: process.env.TWITTER_CLIENT_SECRET ?? "",
+			version: "2.0",
+		}),
 	],
 	secret: process.env.NEXTAUTH_SECRET,
 	session: {

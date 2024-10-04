@@ -42,9 +42,15 @@ const LoginForm = () => {
 							Googleでログイン
 						</Button>
 
-						<Button variant="outline" className="w-full">
+						<Button
+							variant="outline"
+							className="w-full"
+							onClick={() =>
+								signIn("twitter", { callbackUrl: redirectUrl, prompt: "login" })
+							}
+						>
 							<FaXTwitter className="mr-2 h-4 w-4" />
-							Coming Soon...
+							Xでログイン
 						</Button>
 					</CardContent>
 				</Card>
