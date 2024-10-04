@@ -6,7 +6,6 @@ import { Heart, ExternalLink, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { GetPostDto } from "@/dtos/PostDto";
-import { toast } from "sonner";
 
 export const PostItem = ({
 	id,
@@ -20,18 +19,13 @@ export const PostItem = ({
 	const [likes, setLikes] = useState(0);
 	const [isLike, setIsLike] = useState(false);
 
-	const handleLike = () => {
-		fetch(`/api/likes?postId=${id}`, { method: "POST" })
-			.then((response) => {
-				if (response.status === 200) {
-					setLikes((prev) => (isLike ? prev - 1 : prev + 1));
-					setIsLike((prev) => !prev);
-				}
-			})
-			.catch((err) => {
-				console.error(err);
-				toast.error("いいねの処理に失敗しました。");
-			});
+	const handleLike = async () => {
+		setLikes((prev) => (isLike ? prev - 1 : prev + 1));
+		setIsLike((prev) => !prev);
+		const res = await fetch(`/api/likes?postId=${id}`, { method: "POST" });
+		if (res.status !== 200) {
+			console.log("いいね処理に失敗しました。");
+		}
 	};
 
 	useEffect(() => {
