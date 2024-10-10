@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Categories } from "@/defines/categories";
+import { app } from "@/lib/firebase/firebaseProvider";
 
 import {
 	Upload,
@@ -31,6 +32,8 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import type { SubmitPostDto } from "@/dtos/PostDto";
+import { uploadImage } from "@/lib/firebase/firebaseStorage";
+import { resizeImage } from "@/lib/utils";
 
 const formSchema = z.object({
 	title: z
@@ -44,9 +47,6 @@ const formSchema = z.object({
 	price: z.number().min(0, "価格は0以上で入力してください"),
 	link: z.string().url("有効なURLを入力してください"),
 	category: z.string().min(1, "カテゴリーを選択してください"),
-	// image: z
-	// 	.instanceof(FileList)
-	// 	.nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -54,6 +54,8 @@ type FormData = z.infer<typeof formSchema>;
 const PostForm = () => {
 	const router = useRouter();
 	const [imagePreview, setImagePreview] = useState<string | null>(null);
+	const [imageFile, setImageFile] = useState<File | undefined>(undefined);
+	const [ableImageSize, setAbleImageSize] = useState<boolean>(true);
 	const {
 		register,
 		handleSubmit,
@@ -66,10 +68,11 @@ const PostForm = () => {
 
 	const onSubmit = async (data: FormData) => {
 		const userInfo = await getCurrentUser();
-		// toast({
-		// 	title: "商品が投稿されました",
-		// 	description: "商品の投稿が完了しました。",
-		// });
+		const imageName = await uploadImage(
+			userInfo?.email ?? "",
+			app,
+			imageFile ?? undefined,
+		);
 		const submitData: SubmitPostDto = {
 			email: userInfo?.email ?? "",
 			title: data.title,
@@ -77,8 +80,7 @@ const PostForm = () => {
 			price: data.price,
 			link: data.link,
 			category: data.category,
-			// TODO: 現状、画像アップロード機能は使えないのでダミーを
-			imageUrl: "/placeholder.svg?height=200&width=300",
+			imageName: imageName ?? "",
 		};
 		const res = await fetch("/api/post", {
 			method: "POST",
@@ -99,14 +101,25 @@ const PostForm = () => {
 		}
 	};
 
-	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
-			const reader = new FileReader();
-			reader.onloadend = () => {
-				setImagePreview(reader.result as string);
-			};
-			reader.readAsDataURL(file);
+			try {
+				// 画像を1/2にリサイズ
+				const resizedFile = await resizeImage(file);
+
+				setImageFile(resizedFile ?? undefined);
+				if (resizedFile) {
+					const reader = new FileReader();
+					reader.onloadend = () => {
+						// リサイズされた画像をプレビューにセット
+						setImagePreview(reader.result as string);
+					};
+					reader.readAsDataURL(resizedFile); // リサイズ後の画像を読み込む
+				}
+			} catch (error) {
+				console.error("Image resize failed:", error);
+			}
 		}
 	};
 
@@ -291,9 +304,12 @@ const PostForm = () => {
 										</label>
 										<p className="pl-1">またはドラッグ＆ドロップ</p>
 									</div>
-									<p className="text-xs text-gray-500">
-										PNG, JPG, GIF up to 10MB
-									</p>
+									<p className="text-xs text-gray-500">PNG, JPG up to 9MB</p>
+									{!ableImageSize && (
+										<p className="text-xs text-red-500 mt-2">
+											9MB以内の画像をアップロードして下さい
+										</p>
+									)}
 								</div>
 							</div>
 							<AnimatePresence>
@@ -318,7 +334,7 @@ const PostForm = () => {
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-3 rounded-md shadow-md hover:from-yellow-500 hover:to-yellow-600 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-							disabled={!isValid || isSubmitting}
+							disabled={!isValid || isSubmitting || !ableImageSize}
 						>
 							{isSubmitting ? "投稿中..." : "投稿する"}
 						</Button>

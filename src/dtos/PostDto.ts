@@ -6,7 +6,7 @@ export type SubmitPostDto = {
 	link: string;
 	category: string;
 	// DBに合わせている
-	imageUrl: string;
+	imageName: string;
 };
 
 export type GetPostDto = {
