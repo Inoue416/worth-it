@@ -6,6 +6,8 @@ import { Heart, ExternalLink, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import type { GetPostDto } from "@/dtos/PostDto";
+import { app } from "@/lib/firebase/firebaseProvider";
+import { fetchImage } from "@/lib/firebase/firebaseStorage";
 
 export const PostItem = ({
 	id,
@@ -18,6 +20,7 @@ export const PostItem = ({
 }: GetPostDto) => {
 	const [likes, setLikes] = useState(0);
 	const [isLike, setIsLike] = useState(false);
+	const [imageSrc, setImageSrc] = useState<string>("");
 
 	const handleLike = async () => {
 		setLikes((prev) => (isLike ? prev - 1 : prev + 1));
@@ -29,6 +32,14 @@ export const PostItem = ({
 	};
 
 	useEffect(() => {
+		fetchImage(app, imageUrl)
+			.then((imageSrc) => {
+				setImageSrc(imageSrc);
+			})
+			.catch((error) => {
+				setImageSrc("");
+				console.error("Error fetching image:", error);
+			});
 		fetch(`/api/likes?postId=${id}`)
 			.then((response) => response.json())
 			.then((data) => {
@@ -36,7 +47,7 @@ export const PostItem = ({
 				setIsLike(data.isLike);
 			})
 			.catch((err) => console.error(err));
-	}, [id]);
+	}, [id, imageUrl]);
 
 	return (
 		<motion.div
@@ -51,7 +62,7 @@ export const PostItem = ({
 			>
 				<div className="relative w-full h-48 mb-4 overflow-hidden rounded-md">
 					<Image
-						src={imageUrl}
+						src={imageSrc ?? ""}
 						alt={title}
 						fill
 						className="object-cover transition-transform duration-300 group-hover:scale-110"
