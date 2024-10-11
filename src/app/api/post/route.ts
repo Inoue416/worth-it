@@ -46,7 +46,9 @@ async function handlePOST(req: NextRequest) {
 	try {
 		const firebaseStorageUrl = process.env.FIREBASE_STORAGE_URL ?? "";
 		const imageUrl =
-			postData.imageName === "" ? "" : firebaseStorageUrl + postData.imageName;
+			postData.imageName === ""
+				? ""
+				: `${firebaseStorageUrl}/${postData.imageName}`;
 		await prisma.post.create({
 			data: {
 				email: postData.email,

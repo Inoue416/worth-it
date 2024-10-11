@@ -107,6 +107,12 @@ const PostForm = () => {
 			try {
 				// 画像を1/2にリサイズ
 				const resizedFile = await resizeImage(file);
+				const resizedFileSize = resizedFile?.size ?? 0;
+				if (resizedFileSize >= 1024 * 1024 * 5) {
+					setAbleImageSize(false);
+					setImageFile(undefined);
+					return;
+				}
 
 				setImageFile(resizedFile ?? undefined);
 				if (resizedFile) {

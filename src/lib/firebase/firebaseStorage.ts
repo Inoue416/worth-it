@@ -1,6 +1,6 @@
-import { getStorage } from "firebase/storage";
+import { getDownloadURL, getStorage } from "firebase/storage";
 import { ref, uploadBytesResumable } from "firebase/storage";
-import { FirebaseApp } from "firebase/app";
+import type { FirebaseApp } from "firebase/app";
 import { getCurrentFormattedTime } from "@/lib/utils";
 
 export const uploadImage = async (
@@ -40,9 +40,9 @@ export const uploadImage = async (
 			() => {
 				// アップロード完了時の処理
 				console.log("Upload complete!");
-				return uploadFileName;
 			},
 		);
+		return uploadFileName;
 	} catch (error) {
 		console.error("Error in upload:", error);
 		return "";
@@ -50,3 +50,21 @@ export const uploadImage = async (
 };
 
 // TODO: 画像のフェッチ
+export const fetchImage = async (app: FirebaseApp, imageUrl: string) => {
+	if (imageUrl === "") {
+		return "";
+	}
+
+	try {
+		const storage = getStorage(app);
+		const storageRef = ref(storage, imageUrl);
+
+		const url = await getDownloadURL(storageRef);
+		console.log("Ref Url: ", url);
+
+		return url;
+	} catch (error) {
+		console.error("Error fetching image:", error);
+		return "";
+	}
+};
