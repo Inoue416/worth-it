@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, LinkIcon, Tag } from "lucide-react";
+import { Sparkles } from "lucide-react";
+
+// バリデーションスキーマの定義
+const urlSchema = z.string().url("有効なURLを入力してください");
+const keywordsSchema = z
+	.string()
+	.min(3, "3文字以上入力してください")
+	.max(1000, "1000文字以内で入力してください");
 
 interface AIAppealPointGeneratorProps {
 	onGenerate: (generatedText: string) => void;
@@ -17,6 +25,10 @@ export function AIAppealPointGenerator({
 	const [keywords, setKeywords] = useState("");
 	const [generatedText, setGeneratedText] = useState("");
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [isUrlError, setIsUrlError] = useState(false);
+	const [isKeywordsError, setIsKeywordsError] = useState(false);
+	const [urlError, setUrlError] = useState("");
+	const [keywordsError, setKeywordsError] = useState("");
 
 	const simulateStreaming = async (text: string) => {
 		setGeneratedText("");
@@ -33,17 +45,47 @@ export function AIAppealPointGenerator({
 		// 今回はシミュレーションとしてプレースホルダーを使用します
 		const text =
 			type === "url"
-				? `これはURL: ${url} に基づいて生成されたアピールポイントです。商品の特徴や利点が詳細に説明されています。`
-				: `これはキーワード: ${keywords} に基づいて生成されたアピールポイントです。製品の主要な特徴や利点が強調されています。`;
+				? `(mock message)これはURL: ${url} に基づいて生成されたアピールポイントです。商品の特徴や利点が詳細に説明されています。`
+				: `(mock message)これはキーワード: ${keywords} に基づいて生成されたアピールポイントです。製品の主要な特徴や利点が強調されています。`;
 
 		await simulateStreaming(text);
 	};
 
-	useEffect(() => {
-		if (!isGenerating && generatedText) {
-			onGenerate(generatedText);
+	const validateUrl = (inputUrl: string) => {
+		try {
+			urlSchema.parse(inputUrl);
+			setUrlError("");
+			setIsUrlError(false);
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				setUrlError(error.errors[0].message);
+			}
+			setIsUrlError(true);
 		}
-	}, [isGenerating, generatedText, onGenerate]);
+	};
+
+	const validateKeywords = (inputKeywords: string) => {
+		try {
+			keywordsSchema.parse(inputKeywords);
+			setKeywordsError("");
+			setIsKeywordsError(false);
+		} catch (error) {
+			if (error instanceof z.ZodError) {
+				setKeywordsError(error.errors[0].message);
+			}
+			setIsKeywordsError(true);
+		}
+	};
+
+	const handleChangeUrl = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setUrl(event.target.value);
+		validateUrl(event.target.value);
+	};
+
+	const handleChangeKeywords = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setKeywords(event.target.value);
+		validateKeywords(event.target.value);
+	};
 
 	return (
 		<div className="mt-6 p-4 border rounded-lg bg-gray-50">
@@ -55,41 +97,49 @@ export function AIAppealPointGenerator({
 				</TabsList>
 				<TabsContent value="url">
 					<div className="space-y-2">
-						<Label htmlFor="url">商品URL</Label>
-						<div className="flex space-x-2">
-							<Input
-								id="url"
-								value={url}
-								onChange={(e) => setUrl(e.target.value)}
-								placeholder="https://example.com/product"
-							/>
-							<Button
-								onClick={() => handleGenerate("url")}
-								disabled={isGenerating}
-							>
-								<Sparkles className="w-4 h-4 mr-2" />
-								生成
-							</Button>
+						<Label htmlFor="url">商品ページURL</Label>
+						<div className="space-y-2">
+							<div className="flex space-x-2">
+								<Input
+									id="url"
+									value={url}
+									onChange={(e) => handleChangeUrl(e)}
+									placeholder="https://example.com/product"
+								/>
+								<Button
+									onClick={() => handleGenerate("url")}
+									disabled={isGenerating || isUrlError || url === ""}
+								>
+									<Sparkles className="w-4 h-4 mr-2" />
+									生成
+								</Button>
+							</div>
+							{urlError && <p className="text-sm text-red-500">{urlError}</p>}
 						</div>
 					</div>
 				</TabsContent>
 				<TabsContent value="keywords">
 					<div className="space-y-2">
 						<Label htmlFor="keywords">キーワード（カンマ区切り）</Label>
-						<div className="flex space-x-2">
-							<Input
-								id="keywords"
-								value={keywords}
-								onChange={(e) => setKeywords(e.target.value)}
-								placeholder="高品質,耐久性,デザイン"
-							/>
-							<Button
-								onClick={() => handleGenerate("keywords")}
-								disabled={isGenerating}
-							>
-								<Sparkles className="w-4 h-4 mr-2" />
-								生成
-							</Button>
+						<div className="space-y-2">
+							<div className="flex space-x-2">
+								<Input
+									id="keywords"
+									value={keywords}
+									onChange={(e) => handleChangeKeywords(e)}
+									placeholder="高品質,耐久性,デザイン"
+								/>
+								<Button
+									onClick={() => handleGenerate("keywords")}
+									disabled={isGenerating || isKeywordsError || keywords === ""}
+								>
+									<Sparkles className="w-4 h-4 mr-2" />
+									生成
+								</Button>
+							</div>
+							{keywordsError && (
+								<p className="text-sm text-red-500">{keywordsError}</p>
+							)}
 						</div>
 					</div>
 				</TabsContent>
@@ -104,8 +154,16 @@ export function AIAppealPointGenerator({
 						className="mt-2"
 						rows={5}
 					/>
-					{isGenerating && (
+					{isGenerating ? (
 						<div className="mt-2 text-sm text-gray-500">生成中...</div>
+					) : (
+						<Button
+							onClick={() => onGenerate(generatedText)}
+							className="mt-2 w-full"
+							type="button"
+						>
+							生成結果を適用する
+						</Button>
 					)}
 				</div>
 			)}

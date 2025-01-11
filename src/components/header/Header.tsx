@@ -31,7 +31,7 @@ const Header = () => {
 					</SheetTrigger>
 					<SheetContent side="left" className="w-[250px] sm:w-[300px]">
 						<SheetHeader>
-							<SheetTitle></SheetTitle>
+							<SheetTitle />
 						</SheetHeader>
 						<nav className="flex flex-col gap-4">
 							<Link

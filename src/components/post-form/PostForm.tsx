@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Categories } from "@/defines/categories";
-import { app } from "@/lib/firebase/firebaseProvider";
+// import { app } from "@/lib/firebase/firebaseProvider";
 
 import {
 	Upload,
@@ -33,20 +33,38 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/auth";
 import type { SubmitPostDto } from "@/dtos/PostDto";
-import { uploadImage } from "@/lib/firebase/firebaseStorage";
+// import { uploadImage } from "@/lib/firebase/firebaseStorage";
 import { resizeImage } from "@/lib/utils";
 import { AIAppealPointGenerator } from "./AiAppealPointGenerator";
+import { validateSafeString, INVALID_CHARS_MESSAGE } from "@/lib/validations";
 
 const formSchema = z.object({
 	title: z
 		.string()
 		.min(1, "タイトルは必須です")
-		.max(100, "タイトルは100文字以内で入力してください"),
+		.max(100, "タイトルは100文字以内で入力してください")
+		.refine(
+			(val) => validateSafeString(val, "タイトル").success,
+			(val) =>
+				validateSafeString(val, "タイトル").error || {
+					message: INVALID_CHARS_MESSAGE,
+				},
+		),
 	appealPoint: z
 		.string()
 		.min(1, "アピールポイントは必須です")
-		.max(500, "アピールポイントは500文字以内で入力してください"),
-	price: z.number().min(0, "価格は0以上で入力してください"),
+		.max(500, "アピールポイントは500文字以内で入力してください")
+		.refine(
+			(val) => validateSafeString(val, "アピールポイント").success,
+			(val) =>
+				validateSafeString(val, "アピールポイント").error || {
+					message: INVALID_CHARS_MESSAGE,
+				},
+		),
+	price: z
+		.number()
+		.min(0, "価格は0円以上で入力してください")
+		.max(1000000000, "価格は10億円以内で入力してください"),
 	link: z.string().url("有効なURLを入力してください"),
 	category: z.string().min(1, "カテゴリーを選択してください"),
 });
@@ -67,41 +85,48 @@ const PostForm = () => {
 		setValue,
 	} = useForm<FormData>({
 		resolver: zodResolver(formSchema),
+		mode: "onChange",
 	});
 
 	const onSubmit = async (data: FormData) => {
 		const userInfo = await getCurrentUser();
-		const imageName = await uploadImage(
-			userInfo?.email ?? "",
-			app,
-			imageFile ?? undefined,
-		);
-		const submitData: SubmitPostDto = {
-			email: userInfo?.email ?? "",
-			title: data.title,
-			appealPoint: data.appealPoint,
-			price: data.price,
-			link: data.link,
-			category: data.category,
-			imageName: imageName ?? "",
-		};
-		const res = await fetch("/api/post", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(submitData),
-		});
-		const responseData = await res.json();
-		if (!res.ok && res.status !== 201) {
-			console.error("error: ", responseData.message);
-			toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
-		} else {
-			reset();
-			setImagePreview(null);
-			toast.success("投稿の登録に成功しました。");
-			router.push("/post-list");
-		}
+		// const imageName = await uploadImage(
+		// 	userInfo?.email ?? "",
+		// 	app,
+		// 	imageFile ?? undefined,
+		// );
+		// const submitData: SubmitPostDto = {
+		// 	email: userInfo?.email ?? "",
+		// 	title: data.title,
+		// 	appealPoint: data.appealPoint,
+		// 	price: data.price,
+		// 	link: data.link,
+		// 	category: data.category,
+		// 	imageName: imageName ?? "",
+		// };
+		// const res = await fetch("/api/post", {
+		// 	method: "POST",
+		// 	headers: {
+		// 		"Content-Type": "application/json",
+		// 	},
+		// 	body: JSON.stringify(submitData),
+		// });
+		// const responseData = await res.json();
+		// if (!res.ok && res.status !== 201) {
+		// 	console.error("error: ", responseData.message);
+		// 	toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
+		// } else {
+		// 	reset();
+		// 	setImagePreview(null);
+		// 	toast.success("投稿の登録に成功しました。");
+		// 	router.push("/post-list");
+		// }
+
+		// TODO: Delete (モックのためのちに削除する)
+		reset();
+		setImagePreview(null);
+		toast.success("投稿の登録に成功しました。");
+		router.push("/post-list");
 	};
 
 	const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,7 +159,7 @@ const PostForm = () => {
 
 	const [showAIGenerator, setShowAIGenerator] = useState(false);
 	const handleAIGenerated = (generatedText: string) => {
-		setValue("appealPoint", generatedText, { shouldValidate: true });
+		setValue("appealPoint", generatedText);
 	};
 
 	return (
@@ -145,23 +170,6 @@ const PostForm = () => {
 						おすすめ商品を投稿
 					</h2>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-						<AnimatePresence>
-							{Object.keys(errors).length > 0 && (
-								<motion.div
-									initial={{ opacity: 0, y: -10 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: -10 }}
-									className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-									role="alert"
-								>
-									<strong className="font-bold">エラー: </strong>
-									<span className="block sm:inline">
-										フォームに誤りがあります。修正してください。
-									</span>
-								</motion.div>
-							)}
-						</AnimatePresence>
-
 						<div className="space-y-2">
 							<Label
 								htmlFor="title"
@@ -235,6 +243,22 @@ const PostForm = () => {
 							)}
 						</div>
 
+						<div className="mt-6 mb-4">
+							<Button
+								type="button"
+								onClick={() => setShowAIGenerator(!showAIGenerator)}
+								variant={showAIGenerator ? "outline" : "default"}
+								className={showAIGenerator ? "w-full" : "w-full"}
+							>
+								<Sparkles className="w-4 h-4 mr-2" />
+								{showAIGenerator ? "閉じる" : "AIで生成"}
+							</Button>
+						</div>
+
+						{showAIGenerator && (
+							<AIAppealPointGenerator onGenerate={handleAIGenerated} />
+						)}
+
 						<div className="space-y-2">
 							<Label
 								htmlFor="price"
@@ -251,7 +275,9 @@ const PostForm = () => {
 							/>
 							{errors.price && (
 								<p className="text-sm text-red-500 mt-1">
-									{errors.price.message}
+									{errors.price.message === "Expected number, received nan"
+										? "値段を入力してください"
+										: errors.price.message}
 								</p>
 							)}
 						</div>
@@ -344,21 +370,6 @@ const PostForm = () => {
 								)}
 							</AnimatePresence>
 						</div>
-
-						<div className="mt-6 mb-4">
-							<Button
-								type="button"
-								onClick={() => setShowAIGenerator(!showAIGenerator)}
-								className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-							>
-								<Sparkles className="w-4 h-4 mr-2" />
-								{showAIGenerator ? "AI生成を隠す" : "AI生成を表示"}
-							</Button>
-						</div>
-
-						{showAIGenerator && (
-							<AIAppealPointGenerator onGenerate={handleAIGenerated} />
-						)}
 
 						<Button
 							type="submit"
