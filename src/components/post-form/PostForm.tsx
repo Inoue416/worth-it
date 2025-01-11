@@ -29,11 +29,13 @@ import {
 	Type,
 	FileText,
 	Tag,
+	Sparkles,
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import type { SubmitPostDto } from "@/dtos/PostDto";
 import { uploadImage } from "@/lib/firebase/firebaseStorage";
 import { resizeImage } from "@/lib/utils";
+import { AIAppealPointGenerator } from "./AiAppealPointGenerator";
 
 const formSchema = z.object({
 	title: z
@@ -62,6 +64,7 @@ const PostForm = () => {
 		control,
 		formState: { errors, isValid, isSubmitting },
 		reset,
+		setValue,
 	} = useForm<FormData>({
 		resolver: zodResolver(formSchema),
 	});
@@ -127,6 +130,11 @@ const PostForm = () => {
 				console.error("Image resize failed:", error);
 			}
 		}
+	};
+
+	const [showAIGenerator, setShowAIGenerator] = useState(false);
+	const handleAIGenerated = (generatedText: string) => {
+		setValue("appealPoint", generatedText, { shouldValidate: true });
 	};
 
 	return (
@@ -336,6 +344,21 @@ const PostForm = () => {
 								)}
 							</AnimatePresence>
 						</div>
+
+						<div className="mt-6 mb-4">
+							<Button
+								type="button"
+								onClick={() => setShowAIGenerator(!showAIGenerator)}
+								className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+							>
+								<Sparkles className="w-4 h-4 mr-2" />
+								{showAIGenerator ? "AI生成を隠す" : "AI生成を表示"}
+							</Button>
+						</div>
+
+						{showAIGenerator && (
+							<AIAppealPointGenerator onGenerate={handleAIGenerated} />
+						)}
 
 						<Button
 							type="submit"
