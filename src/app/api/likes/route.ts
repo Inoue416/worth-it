@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth/auth";
 import { createLike, getIsLike, getLikes } from "@/lib/likes";
 
 async function handleGET(req: NextRequest) {

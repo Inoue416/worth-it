@@ -1,6 +1,6 @@
 "use server";
 import { type NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth/auth";
 import { prismaClient } from "@/lib/prismaClientProvider";
 import { FetchLimit } from "@/defines/posts";
 import { getPosts } from "@/lib/posts";
