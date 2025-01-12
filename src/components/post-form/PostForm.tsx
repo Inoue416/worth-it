@@ -31,7 +31,7 @@ import {
 	Tag,
 	Sparkles,
 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth/auth";
 import type {
 	EditPostDto,
 	EditSubmitPostDto,
