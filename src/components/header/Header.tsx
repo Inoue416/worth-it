@@ -55,7 +55,14 @@ const Header = () => {
 										className="text-lg font-semibold"
 										onClick={() => setIsOpen(false)}
 									>
-										投稿する
+										新規投稿
+									</Link>
+									<Link
+										href="/managed-posts"
+										className="text-lg font-semibold"
+										onClick={() => setIsOpen(false)}
+									>
+										投稿管理
 									</Link>
 									<Button
 										className="text-lg font-semibold"

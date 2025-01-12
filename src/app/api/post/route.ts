@@ -63,7 +63,7 @@ async function handlePOST(req: NextRequest) {
 
 		return NextResponse.json(
 			{ message: "Success create post." },
-			{ status: 201 },
+			{ status: 200 },
 		);
 	} catch (error) {
 		console.error("Error creating post:", error);

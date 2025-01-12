@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Categories } from "@/defines/categories";
-// import { app } from "@/lib/firebase/firebaseProvider";
+import { app } from "@/lib/firebase/firebaseProvider";
 
 import {
 	Upload,
@@ -31,9 +31,13 @@ import {
 	Tag,
 	Sparkles,
 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth/auth";
-import type { SubmitPostDto } from "@/dtos/PostDto";
-// import { uploadImage } from "@/lib/firebase/firebaseStorage";
+import { getCurrentUser } from "@/lib/auth";
+import type {
+	EditPostDto,
+	EditSubmitPostDto,
+	SubmitPostDto,
+} from "@/dtos/PostDto";
+import { uploadImage } from "@/lib/firebase/firebaseStorage";
 import { resizeImage } from "@/lib/utils";
 import { AIAppealPointGenerator } from "./AiAppealPointGenerator";
 import { validateSafeString, INVALID_CHARS_MESSAGE } from "@/lib/validations";
@@ -71,62 +75,91 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-const PostForm = () => {
+export interface PostFormProps {
+	title: string;
+	defaultPost?: EditPostDto;
+}
+
+const PostForm = (props: PostFormProps) => {
 	const router = useRouter();
-	const [imagePreview, setImagePreview] = useState<string | null>(null);
+	const [imagePreview, setImagePreview] = useState<string | null>(
+		props.defaultPost?.imageSrc ?? null,
+	);
 	const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 	const [ableImageSize, setAbleImageSize] = useState<boolean>(true);
+	const defaultPost = props.defaultPost;
+	console.log("defaultPost: ", defaultPost);
 	const {
 		register,
 		handleSubmit,
 		control,
-		formState: { errors, isValid, isSubmitting },
+		formState: { errors, isValid, isSubmitting, isDirty },
 		reset,
 		setValue,
 	} = useForm<FormData>({
+		defaultValues: {
+			title: defaultPost?.title ?? "",
+			appealPoint: defaultPost?.appealPoint ?? "",
+			price: defaultPost?.price ?? 0,
+			link: defaultPost?.link ?? "",
+			category: defaultPost?.category ?? "",
+		},
 		resolver: zodResolver(formSchema),
 		mode: "onChange",
 	});
 
 	const onSubmit = async (data: FormData) => {
 		const userInfo = await getCurrentUser();
-		// const imageName = await uploadImage(
-		// 	userInfo?.email ?? "",
-		// 	app,
-		// 	imageFile ?? undefined,
-		// );
-		// const submitData: SubmitPostDto = {
-		// 	email: userInfo?.email ?? "",
-		// 	title: data.title,
-		// 	appealPoint: data.appealPoint,
-		// 	price: data.price,
-		// 	link: data.link,
-		// 	category: data.category,
-		// 	imageName: imageName ?? "",
-		// };
-		// const res = await fetch("/api/post", {
-		// 	method: "POST",
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// 	body: JSON.stringify(submitData),
-		// });
-		// const responseData = await res.json();
-		// if (!res.ok && res.status !== 201) {
-		// 	console.error("error: ", responseData.message);
-		// 	toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
-		// } else {
-		// 	reset();
-		// 	setImagePreview(null);
-		// 	toast.success("投稿の登録に成功しました。");
-		// 	router.push("/post-list");
-		// }
-
-		// TODO: Delete (モックのためのちに削除する)
-		reset();
-		setImagePreview(null);
-		toast.success("投稿の登録に成功しました。");
-		router.push("/post-list");
+		const imageName =
+			defaultPost === undefined
+				? await uploadImage(userInfo?.email ?? "", app, imageFile ?? undefined)
+				: imageFile === undefined
+					? defaultPost.imageUrl
+					: await uploadImage(
+							userInfo?.email ?? "",
+							app,
+							imageFile ?? undefined,
+						);
+		const submitData: SubmitPostDto | EditSubmitPostDto =
+			defaultPost === undefined
+				? {
+						email: userInfo?.email ?? "",
+						title: data.title,
+						appealPoint: data.appealPoint,
+						price: data.price,
+						link: data.link,
+						category: data.category,
+						imageName: imageName ?? "",
+					}
+				: {
+						id: defaultPost.id,
+						email: userInfo?.email ?? "",
+						title: data.title,
+						appealPoint: data.appealPoint,
+						price: data.price,
+						link: data.link,
+						category: data.category,
+						imageName: imageName ?? "",
+					};
+		const apiEndpoint =
+			defaultPost === undefined ? "/api/post" : "/api/post/edit";
+		const res = await fetch(apiEndpoint, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(submitData),
+		});
+		const responseData = await res.json();
+		if (!res.ok && res.status !== 200) {
+			console.error("error: ", responseData.message);
+			toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
+		} else {
+			reset();
+			setImagePreview(null);
+			toast.success("投稿の登録に成功しました。");
+			router.push("/post-list");
+		}
 	};
 
 	const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,7 +200,7 @@ const PostForm = () => {
 			<Card className="w-full max-w-2xl bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden">
 				<CardContent className="p-8">
 					<h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-						おすすめ商品を投稿
+						{props.title}
 					</h2>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 						<div className="space-y-2">
@@ -374,9 +407,15 @@ const PostForm = () => {
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-3 rounded-md shadow-md hover:from-yellow-500 hover:to-yellow-600 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-							disabled={!isValid || isSubmitting || !ableImageSize}
+							disabled={!isValid || isSubmitting || !ableImageSize || !isDirty}
 						>
-							{isSubmitting ? "投稿中..." : "投稿する"}
+							{defaultPost === undefined
+								? isSubmitting
+									? "投稿中..."
+									: "投稿する"
+								: isSubmitting
+									? "更新中..."
+									: "更新する"}
 						</Button>
 					</form>
 				</CardContent>
