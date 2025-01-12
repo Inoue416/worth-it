@@ -16,10 +16,6 @@ const Page = () => {
 	}
 
 	const { post, isLoading, fetchMyPost } = useMyPostGetById();
-	if (isLoading === false && post === undefined) {
-		toast.error("不正なアクセスです");
-		router.push("/");
-	}
 
 	useEffect(() => {
 		fetchMyPost(Number(postId));

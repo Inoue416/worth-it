@@ -1,6 +1,6 @@
 "use server";
 import { type NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth/auth";
 import { prismaClient } from "@/lib/prismaClientProvider";
 import type { GetPostDto } from "@/dtos/PostDto";
 

@@ -192,7 +192,10 @@ const PostForm = (props: PostFormProps) => {
 
 	const [showAIGenerator, setShowAIGenerator] = useState(false);
 	const handleAIGenerated = (generatedText: string) => {
-		setValue("appealPoint", generatedText);
+		setValue("appealPoint", generatedText, {
+			shouldValidate: true,
+			shouldDirty: true,
+		});
 	};
 
 	return (

@@ -45,8 +45,8 @@ export function AIAppealPointGenerator({
 		// 今回はシミュレーションとしてプレースホルダーを使用します
 		const text =
 			type === "url"
-				? `(mock message)これはURL: ${url} に基づいて生成されたアピールポイントです。商品の特徴や利点が詳細に説明されています。`
-				: `(mock message)これはキーワード: ${keywords} に基づいて生成されたアピールポイントです。製品の主要な特徴や利点が強調されています。`;
+				? `mock message これはURL: ${url} に基づいて生成されたアピールポイントです。商品の特徴や利点が詳細に説明されています。`
+				: `mock message これはキーワード: ${keywords} に基づいて生成されたアピールポイントです。製品の主要な特徴や利点が強調されています。`;
 
 		await simulateStreaming(text);
 	};
