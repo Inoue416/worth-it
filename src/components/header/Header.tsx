@@ -6,7 +6,12 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 
 const Header = () => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -46,7 +51,14 @@ const Header = () => {
 										className="text-lg font-semibold"
 										onClick={() => setIsOpen(false)}
 									>
-										投稿する
+										新規投稿
+									</Link>
+									<Link
+										href="/managed-posts"
+										className="text-lg font-semibold"
+										onClick={() => setIsOpen(false)}
+									>
+										投稿管理
 									</Link>
 									<Button
 										className="text-lg font-semibold"

@@ -1,11 +1,11 @@
-import { Suspense } from "react";
+// import { Suspense } from "react";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/header/Header";
 import NextAuthProvider from "./providers/NextAuthProvider";
 import { Toaster } from "@/components/ui/sonner";
-import Loading from "@/components/loading/Loading";
+// import Loading from "@/components/loading/Loading";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -36,7 +36,8 @@ export default function RootLayout({
 				<NextAuthProvider>
 					<Header />
 					<div className="min-h-screen bg-gradient-to-r from-yellow-200 via-yellow-300 to-yellow-400 py-12 px-4 sm:px-6 lg:px-8">
-						<Suspense fallback={<Loading />}>{children}</Suspense>
+						{/* <Suspense fallback={<Loading />}>{children}</Suspense> */}
+						{children}
 					</div>
 				</NextAuthProvider>
 				<Toaster richColors />
