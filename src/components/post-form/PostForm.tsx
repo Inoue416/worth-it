@@ -29,68 +29,128 @@ import {
 	Type,
 	FileText,
 	Tag,
+	Sparkles,
 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
-import type { SubmitPostDto } from "@/dtos/PostDto";
+import { getCurrentUser } from "@/lib/auth/auth";
+import type {
+	EditPostDto,
+	EditSubmitPostDto,
+	SubmitPostDto,
+} from "@/dtos/PostDto";
 import { uploadImage } from "@/lib/firebase/firebaseStorage";
 import { resizeImage } from "@/lib/utils";
+import { AIAppealPointGenerator } from "./AiAppealPointGenerator";
+import { validateSafeString, INVALID_CHARS_MESSAGE } from "@/lib/validations";
 
 const formSchema = z.object({
 	title: z
 		.string()
 		.min(1, "タイトルは必須です")
-		.max(100, "タイトルは100文字以内で入力してください"),
+		.max(100, "タイトルは100文字以内で入力してください")
+		.refine(
+			(val) => validateSafeString(val, "タイトル").success,
+			(val) =>
+				validateSafeString(val, "タイトル").error || {
+					message: INVALID_CHARS_MESSAGE,
+				},
+		),
 	appealPoint: z
 		.string()
 		.min(1, "アピールポイントは必須です")
-		.max(500, "アピールポイントは500文字以内で入力してください"),
-	price: z.number().min(0, "価格は0以上で入力してください"),
+		.max(500, "アピールポイントは500文字以内で入力してください")
+		.refine(
+			(val) => validateSafeString(val, "アピールポイント").success,
+			(val) =>
+				validateSafeString(val, "アピールポイント").error || {
+					message: INVALID_CHARS_MESSAGE,
+				},
+		),
+	price: z
+		.number()
+		.min(0, "価格は0円以上で入力してください")
+		.max(1000000000, "価格は10億円以内で入力してください"),
 	link: z.string().url("有効なURLを入力してください"),
 	category: z.string().min(1, "カテゴリーを選択してください"),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-const PostForm = () => {
+export interface PostFormProps {
+	title: string;
+	defaultPost?: EditPostDto;
+}
+
+const PostForm = (props: PostFormProps) => {
 	const router = useRouter();
-	const [imagePreview, setImagePreview] = useState<string | null>(null);
+	const [imagePreview, setImagePreview] = useState<string | null>(
+		props.defaultPost?.imageSrc ?? null,
+	);
 	const [imageFile, setImageFile] = useState<File | undefined>(undefined);
 	const [ableImageSize, setAbleImageSize] = useState<boolean>(true);
+	const defaultPost = props.defaultPost;
+	console.log("defaultPost: ", defaultPost);
 	const {
 		register,
 		handleSubmit,
 		control,
-		formState: { errors, isValid, isSubmitting },
+		formState: { errors, isValid, isSubmitting, isDirty },
 		reset,
+		setValue,
 	} = useForm<FormData>({
+		defaultValues: {
+			title: defaultPost?.title ?? "",
+			appealPoint: defaultPost?.appealPoint ?? "",
+			price: defaultPost?.price ?? 0,
+			link: defaultPost?.link ?? "",
+			category: defaultPost?.category ?? "",
+		},
 		resolver: zodResolver(formSchema),
+		mode: "onChange",
 	});
 
 	const onSubmit = async (data: FormData) => {
 		const userInfo = await getCurrentUser();
-		const imageName = await uploadImage(
-			userInfo?.email ?? "",
-			app,
-			imageFile ?? undefined,
-		);
-		const submitData: SubmitPostDto = {
-			email: userInfo?.email ?? "",
-			title: data.title,
-			appealPoint: data.appealPoint,
-			price: data.price,
-			link: data.link,
-			category: data.category,
-			imageName: imageName ?? "",
-		};
+		const imageName =
+			defaultPost === undefined
+				? await uploadImage(userInfo?.email ?? "", app, imageFile ?? undefined)
+				: imageFile === undefined
+					? defaultPost.imageUrl
+					: await uploadImage(
+							userInfo?.email ?? "",
+							app,
+							imageFile ?? undefined,
+						);
+		const submitData: SubmitPostDto | EditSubmitPostDto =
+			defaultPost === undefined
+				? {
+						email: userInfo?.email ?? "",
+						title: data.title,
+						appealPoint: data.appealPoint,
+						price: data.price,
+						link: data.link,
+						category: data.category,
+						imageName: imageName ?? "",
+					}
+				: {
+						id: defaultPost.id,
+						email: userInfo?.email ?? "",
+						title: data.title,
+						appealPoint: data.appealPoint,
+						price: data.price,
+						link: data.link,
+						category: data.category,
+						imageName: imageName ?? "",
+					};
+		const apiMethod = defaultPost === undefined ? "POST" : "PUT";
 		const res = await fetch("/api/post", {
-			method: "POST",
+			method: apiMethod,
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify(submitData),
 		});
 		const responseData = await res.json();
-		if (!res.ok && res.status !== 201) {
+		if (!res.ok && res.status !== 200) {
 			console.error("error: ", responseData.message);
 			toast.error("投稿の登録に失敗しました。時間を空けて再度お試しください。");
 		} else {
@@ -129,31 +189,22 @@ const PostForm = () => {
 		}
 	};
 
+	const [showAIGenerator, setShowAIGenerator] = useState(false);
+	const handleAIGenerated = (generatedText: string) => {
+		setValue("appealPoint", generatedText, {
+			shouldValidate: true,
+			shouldDirty: true,
+		});
+	};
+
 	return (
 		<div className="flex items-center justify-center">
 			<Card className="w-full max-w-2xl bg-white/90 backdrop-blur-sm shadow-xl rounded-2xl overflow-hidden">
 				<CardContent className="p-8">
 					<h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-						おすすめ商品を投稿
+						{props.title}
 					</h2>
 					<form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-						<AnimatePresence>
-							{Object.keys(errors).length > 0 && (
-								<motion.div
-									initial={{ opacity: 0, y: -10 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: -10 }}
-									className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-									role="alert"
-								>
-									<strong className="font-bold">エラー: </strong>
-									<span className="block sm:inline">
-										フォームに誤りがあります。修正してください。
-									</span>
-								</motion.div>
-							)}
-						</AnimatePresence>
-
 						<div className="space-y-2">
 							<Label
 								htmlFor="title"
@@ -227,6 +278,22 @@ const PostForm = () => {
 							)}
 						</div>
 
+						<div className="mt-6 mb-4">
+							<Button
+								type="button"
+								onClick={() => setShowAIGenerator(!showAIGenerator)}
+								variant={showAIGenerator ? "outline" : "default"}
+								className={showAIGenerator ? "w-full" : "w-full"}
+							>
+								<Sparkles className="w-4 h-4 mr-2" />
+								{showAIGenerator ? "閉じる" : "AIで生成"}
+							</Button>
+						</div>
+
+						{showAIGenerator && (
+							<AIAppealPointGenerator onGenerate={handleAIGenerated} />
+						)}
+
 						<div className="space-y-2">
 							<Label
 								htmlFor="price"
@@ -243,7 +310,9 @@ const PostForm = () => {
 							/>
 							{errors.price && (
 								<p className="text-sm text-red-500 mt-1">
-									{errors.price.message}
+									{errors.price.message === "Expected number, received nan"
+										? "値段を入力してください"
+										: errors.price.message}
 								</p>
 							)}
 						</div>
@@ -340,9 +409,15 @@ const PostForm = () => {
 						<Button
 							type="submit"
 							className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-white font-semibold py-3 rounded-md shadow-md hover:from-yellow-500 hover:to-yellow-600 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-							disabled={!isValid || isSubmitting || !ableImageSize}
+							disabled={!isValid || isSubmitting || !ableImageSize || !isDirty}
 						>
-							{isSubmitting ? "投稿中..." : "投稿する"}
+							{defaultPost === undefined
+								? isSubmitting
+									? "投稿中..."
+									: "投稿する"
+								: isSubmitting
+									? "更新中..."
+									: "更新する"}
 						</Button>
 					</form>
 				</CardContent>
