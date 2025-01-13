@@ -21,7 +21,7 @@ const Page = () => {
 		fetchMyPost(Number(postId));
 	}, [fetchMyPost, postId]);
 
-	if (isLoading) {
+	if (isLoading || !post) {
 		return <Loading />;
 	}
 	return <PostForm title="投稿の編集" defaultPost={post} />;

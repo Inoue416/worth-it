@@ -141,10 +141,10 @@ const PostForm = (props: PostFormProps) => {
 						category: data.category,
 						imageName: imageName ?? "",
 					};
-		const apiEndpoint =
-			defaultPost === undefined ? "/api/post" : "/api/post/edit";
-		const res = await fetch(apiEndpoint, {
-			method: "POST",
+		const apiMethod =
+			defaultPost === undefined ? "POST" : "PUT";
+		const res = await fetch("/api/post", {
+			method: apiMethod,
 			headers: {
 				"Content-Type": "application/json",
 			},

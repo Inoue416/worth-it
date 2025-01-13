@@ -15,6 +15,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import NormalDialog from "../alert/NormalDialog";
 
 interface ManagedPostItemProps extends MyPostDto {
 	onDelete: (id: number) => void;
@@ -30,6 +31,7 @@ export const ManagedPostItem = ({
 	onDelete,
 }: ManagedPostItemProps) => {
 	const [imageSrc, setImageSrc] = useState<string>("");
+	const [isOpenDialog, setIsOpenDialog] = useState(false);
 
 	useEffect(() => {
 		fetchImage(app, imageUrl)
@@ -93,13 +95,22 @@ export const ManagedPostItem = ({
 								<span>編集</span>
 							</Link>
 						</DropdownMenuItem>
-						<DropdownMenuItem onClick={() => onDelete(id)}>
+						<DropdownMenuItem onClick={() => setIsOpenDialog(true)}>
 							<Trash2 className="mr-2 h-4 w-4" />
 							<span>削除</span>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
+			<NormalDialog
+				title="本当に投稿を削除しますか？"
+				description="この操作は取り消すことができません。"
+				cancelText="キャンセル"
+				confirmText="削除"
+				onAction={() => onDelete(id)}
+				isOpenDialog={isOpenDialog}
+				setIsOpenDialog={setIsOpenDialog}
+			/>
 		</motion.div>
 	);
 };
