@@ -11,10 +11,9 @@ import type { deletePostType } from "../api/post/route";
 
 export default function Page() {
 	const { myPosts, isLoading } = useMyPosts();
-	const router = useRouter();
 
 	const requestDeletePost = async (id: number) => {
-		const deleteReqBody: deletePostType = { postId: id }
+		const deleteReqBody: deletePostType = { postId: id };
 		const res = await fetch("/api/post", {
 			method: "DELETE",
 			headers: {
