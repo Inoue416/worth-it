@@ -4,7 +4,11 @@ import { getSession } from "@/lib/auth/auth";
 import { prismaClient } from "@/lib/prismaClientProvider";
 import { FetchLimit } from "@/defines/posts";
 import { deletePost, getPosts } from "@/lib/posts";
-import type { EditSubmitPostDto, GetPostDto, SubmitPostDto } from "@/dtos/PostDto";
+import type {
+	EditSubmitPostDto,
+	GetPostDto,
+	SubmitPostDto,
+} from "@/dtos/PostDto";
 
 const prisma = prismaClient;
 
@@ -119,28 +123,40 @@ export interface deletePostType {
 }
 
 const handleDelete = async (req: NextRequest) => {
-    const session = await getSession();
-	const { postId } = await req.json() as deletePostType;
+	const session = await getSession();
+	const { postId } = (await req.json()) as deletePostType;
 	const email = session?.user?.email;
 	if (!session || !postId || !email) {
 		return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 	}
 
-    try {
+	try {
 		console.log("--- Post Delete ---");
 		console.log("PostId: ", postId);
 		console.log("Email: ", email);
-        const result = await deletePost(postId, email);
-        if (!result) {
-            return NextResponse.json({ message: "Error deleting post" }, { status: 500 });
-        }
-        return NextResponse.json({ message: "Success delete post." }, { status: 200 });
-    } catch (error) {
-        console.error("Error deleting post:", error);
-        return NextResponse.json({ message: "Error deleting post" }, { status: 500 });
-    }
+		const result = await deletePost(postId, email);
+		if (!result) {
+			return NextResponse.json(
+				{ message: "Error deleting post" },
+				{ status: 500 },
+			);
+		}
+		return NextResponse.json(
+			{ message: "Success delete post." },
+			{ status: 200 },
+		);
+	} catch (error) {
+		console.error("Error deleting post:", error);
+		return NextResponse.json(
+			{ message: "Error deleting post" },
+			{ status: 500 },
+		);
+	}
 };
 
-
-
-export { handleGET as GET, handlePOST as POST, handlePut as PUT, handleDelete as DELETE };
+export {
+	handleGET as GET,
+	handlePOST as POST,
+	handlePut as PUT,
+	handleDelete as DELETE,
+};

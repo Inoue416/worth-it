@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { ManagedPostItem } from "@/components/post-item/ManagedPostItem";
 import { toast } from "sonner";
-import { deletePostType } from "../api/post/route";
+import type { deletePostType } from "../api/post/route";
 
 export default function Page() {
 	const { myPosts, isLoading } = useMyPosts();

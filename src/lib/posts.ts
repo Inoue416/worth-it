@@ -31,7 +31,7 @@ export const deletePost = async (id: number, email: string) => {
 		await prisma.post.delete({
 			where: {
 				id: id,
-				email: email
+				email: email,
 			},
 		});
 		return true;
@@ -39,4 +39,4 @@ export const deletePost = async (id: number, email: string) => {
 		console.error("Error deleting post:", error);
 		return false;
 	}
-}
+};
