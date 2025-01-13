@@ -19,3 +19,21 @@ export type GetPostDto = {
 	imageUrl: string;
 	updatedAt: Date;
 };
+
+export type MyPostDto = {
+	id: number;
+	title: string;
+	appealPoint: string;
+	price: number;
+	category: string;
+	imageUrl: string;
+	updatedAt: Date;
+};
+
+export interface EditPostDto extends GetPostDto {
+	imageSrc: string;
+}
+
+export interface EditSubmitPostDto extends SubmitPostDto {
+	id: number;
+}

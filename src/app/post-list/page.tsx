@@ -4,7 +4,7 @@ import { PostItem } from "@/components/post-item/PostItem";
 import type { GetPostDto } from "@/dtos/PostDto";
 import { FetchLimit } from "@/defines/posts";
 import { toast } from "sonner";
-import InfiniteScrollLoader from "@/components/loading/InfiniteScrollLoader";
+import PostListLayout from "@/components/layout/PostListLayout";
 
 export default function Page() {
 	const [posts, setPosts] = useState<GetPostDto[]>([]);
@@ -61,10 +61,7 @@ export default function Page() {
 	}, [loading, hasMore]);
 
 	return (
-		<div className="max-w-7xl mx-auto">
-			<h1 className="text-3xl font-extrabold text-gray-900 mb-8 text-center">
-				みんなの投稿一覧
-			</h1>
+		<PostListLayout title="みんなの投稿一覧" isLoading={loading}>
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
 				{posts.map((item, index) => (
 					<div
@@ -75,7 +72,6 @@ export default function Page() {
 					</div>
 				))}
 			</div>
-			{loading && <InfiniteScrollLoader />}
-		</div>
+		</PostListLayout>
 	);
 }

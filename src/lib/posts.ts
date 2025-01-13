@@ -25,3 +25,18 @@ export const getPosts = async (page: number, limit: number) => {
 
 	return posts;
 };
+
+export const deletePost = async (id: number, email: string) => {
+	try {
+		await prisma.post.delete({
+			where: {
+				id: id,
+				email: email,
+			},
+		});
+		return true;
+	} catch (error) {
+		console.error("Error deleting post:", error);
+		return false;
+	}
+};
