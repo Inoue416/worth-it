@@ -20,6 +20,9 @@ const customJestConfig = {
     '!src/app/layout.tsx',
     '!src/app/globals.css',
   ],
+  transformIgnorePatterns: [
+    'node_modules/(?!lucide-react/)'
+  ],
 }
 
 // Next.jsの設定とマージして export
