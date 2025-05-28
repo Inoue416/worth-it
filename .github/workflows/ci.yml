@@ -30,5 +30,18 @@ jobs:
       - name: Run lint
         run: pnpm lint
 
+      - name: Run tests
+        run: pnpm test
+
+      - name: Run tests with coverage
+        run: pnpm test:coverage
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+
       - name: Build project
         run: pnpm build
